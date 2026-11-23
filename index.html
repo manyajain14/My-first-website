@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>The Midnight Library — An Aspirational Journal</title>
 <meta name="description" content="A fan-made interactive journal inspired by Matt Haig's The Midnight Library. Open the window, borrow a life, and return to your own.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
@@ -15,35 +15,76 @@
 
 <!-- ================= LANDING ================= -->
 <main id="screen-landing" class="screen active" aria-label="Welcome">
-  <p class="overline">Between life and death there is a library</p>
-  <h1 class="site-title">The Midnight<br>Library</h1>
-  <p class="site-sub">An aspirational journal for the lives we almost lived.</p>
+  <div class="stage stage-landing">
+    <p class="overline">Between life and death there is a library</p>
+    <h1 class="site-title">The Midnight<br>Library</h1>
+    <p class="site-sub">An aspirational journal for the lives we almost lived.</p>
 
-  <button id="window-door" class="window" aria-label="Open the window into the library" aria-expanded="false">
-    <span class="window-frame">
-      <span class="window-inner">
-        <span class="glow"></span>
-        <span class="glass"></span>
-        <span class="pane pane-left"></span>
-        <span class="pane pane-right"></span>
-        <span class="mullion mullion-v"></span>
-        <span class="mullion mullion-h"></span>
-      </span>
-    </span>
-    <span class="hint">Click the window to open it</span>
-  </button>
+    <div class="scene">
+      <div class="wall-glow" aria-hidden="true"></div>
 
-  <p id="welcome-back" class="welcome-back" hidden></p>
+      <button id="window-door" class="window3d" aria-label="Open the window into the library" aria-expanded="false">
+        <span class="window-tilt">
+          <span class="win-frame">
+            <span class="win-scene" aria-hidden="true">
+              <span class="win-sky"></span>
+              <span class="win-core"></span>
+              <span class="win-stars">
+                <i style="--x:12%;--y:18%;--d:0s;--s:1.4"></i>
+                <i style="--x:28%;--y:9%;--d:.7s;--s:1"></i>
+                <i style="--x:47%;--y:14%;--d:1.3s;--s:1.8"></i>
+                <i style="--x:63%;--y:7%;--d:.4s;--s:1.1"></i>
+                <i style="--x:79%;--y:16%;--d:1.9s;--s:1.5"></i>
+                <i style="--x:90%;--y:28%;--d:1s;--s:.9"></i>
+                <i style="--x:8%;--y:44%;--d:2.2s;--s:1.2"></i>
+                <i style="--x:35%;--y:38%;--d:.2s;--s:1"></i>
+                <i style="--x:56%;--y:31%;--d:1.6s;--s:1.6"></i>
+                <i style="--x:72%;--y:45%;--d:.9s;--s:1.3"></i>
+                <i style="--x:20%;--y:62%;--d:2.6s;--s:1.1"></i>
+                <i style="--x:66%;--y:66%;--d:.5s;--s:1.4"></i>
+                <i style="--x:86%;--y:72%;--d:1.2s;--s:1"></i>
+                <i style="--x:42%;--y:78%;--d:2.1s;--s:1.2"></i>
+              </span>
+              <span class="win-hills"></span>
+            </span>
 
-  <footer class="landing-foot">
-    <p class="teaser">Some lives must be borrowed before the one you have is seen.</p>
-    <p class="credit">A fan-made tribute, inspired by Matt Haig&rsquo;s <em>The Midnight Library</em>.</p>
-  </footer>
+            <span class="sash sash-left" aria-hidden="true">
+              <span class="pane-glass"></span>
+              <span class="bar bar-v"></span>
+              <span class="bar bar-h"></span>
+              <span class="handle"></span>
+              <span class="hinge hinge-top"></span>
+              <span class="hinge hinge-bottom"></span>
+            </span>
+            <span class="sash sash-right" aria-hidden="true">
+              <span class="pane-glass"></span>
+              <span class="bar bar-v"></span>
+              <span class="bar bar-h"></span>
+              <span class="handle"></span>
+              <span class="hinge hinge-top"></span>
+              <span class="hinge hinge-bottom"></span>
+            </span>
+          </span>
+          <span class="win-sill" aria-hidden="true"></span>
+        </span>
+      </button>
+
+      <span class="floor-light" aria-hidden="true"></span>
+      <span class="hint" id="window-hint">Click the window to open it</span>
+    </div>
+
+    <p id="welcome-back" class="welcome-back" hidden></p>
+
+    <footer class="landing-foot">
+      <p class="teaser">Some lives must be borrowed before the one you have is seen.</p>
+      <p class="credit">A fan-made tribute, inspired by Matt Haig&rsquo;s <em>The Midnight Library</em>.</p>
+    </footer>
+  </div>
 </main>
 
 <!-- ================= DETAILS FORM ================= -->
 <section id="screen-form" class="screen" aria-label="Your details">
-  <div class="form-wrap">
+  <div class="stage stage-narrow">
     <p class="overline">Step through</p>
     <h2 class="screen-title">Tell the library who you are</h2>
     <p class="lede">Before the doors can open, the librarian asks for three small truths.</p>
@@ -73,10 +114,10 @@
 
 <!-- ================= SHELF OF LIVES ================= -->
 <section id="screen-library" class="screen" aria-label="The shelf of borrowed lives">
-  <div class="lib-wrap">
+  <div class="stage stage-wide">
     <p class="overline">The library of lives</p>
     <h2 class="screen-title" id="library-title">Welcome, traveler.</h2>
-    <p class="lede" id="library-lede">Three volumes have been pulled for you. Borrow one — or return to your own life.</p>
+    <p class="lede" id="library-lede">Three volumes have been pulled for you, from the shelf nearest your wishing heart.</p>
 
     <div id="shelf" class="shelf"></div>
 
@@ -104,7 +145,7 @@
 
 <!-- ================= EPILOGUE ================= -->
 <section id="screen-epilogue" class="screen" aria-label="Epilogue">
-  <div class="epi-wrap">
+  <div class="stage stage-narrow">
     <p class="overline">Epilogue</p>
     <h2 class="screen-title">The Most Perfect Role</h2>
     <canvas id="constellation" aria-hidden="true"></canvas>
@@ -116,9 +157,20 @@
   </div>
 </section>
 
+<button id="sound-toggle" class="sound-toggle" aria-pressed="true" aria-label="Toggle sound">
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <path class="spk" d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
+    <path class="wav wav-1" d="M16 9c1.2 1 1.2 5 0 6" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round"/>
+    <path class="wav wav-2" d="M18.5 7c2.2 2 2.2 10 0 10" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round"/>
+    <line class="mute-line" x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+  <span id="sound-label">Sound</span>
+</button>
+
 <noscript><p class="noscript">The library needs JavaScript to open its doors.</p></noscript>
 
 <script src="js/stars.js"></script>
+<script src="js/audio.js"></script>
 <script src="js/lives.js"></script>
 <script src="js/app.js"></script>
 </body>

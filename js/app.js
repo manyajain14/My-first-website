@@ -69,12 +69,43 @@
 
   function initWindow() {
     var win = $("#window-door");
+    var scene = win.closest(".scene");
+    var hint = $("#window-hint");
+
     win.addEventListener("click", function () {
       if (win.classList.contains("open")) return;
       win.classList.add("open");
       win.setAttribute("aria-expanded", "true");
-      setTimeout(function () { show("screen-form"); }, 1250);
+      scene.classList.add("open");
+      hint.classList.add("gone");
+      scene.querySelector(".floor-light").classList.add("on");
+      if (window.SoundFX) SoundFX.open();
+      setTimeout(function () { show("screen-form"); }, 1500);
     });
+
+    /* gentle Blender-style parallax tilt on the window */
+    var finePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+    var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var tilt = win.querySelector(".window-tilt");
+
+    if (finePointer && !reducedMotion) {
+      var raf = null;
+      scene.addEventListener("mousemove", function (e) {
+        var rect = scene.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / rect.width - 0.5;
+        var py = (e.clientY - rect.top) / rect.height - 0.5;
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          tilt.style.setProperty("--ry", (px * 7).toFixed(2) + "deg");
+          tilt.style.setProperty("--rx", (-py * 6).toFixed(2) + "deg");
+          raf = null;
+        });
+      });
+      scene.addEventListener("mouseleave", function () {
+        tilt.style.setProperty("--rx", "0deg");
+        tilt.style.setProperty("--ry", "0deg");
+      });
+    }
   }
 
   /* -------------------------- form --------------------------- */
@@ -124,7 +155,10 @@
         '<span class="vol">Volume ' + life.volume + "</span>" +
         '<span class="btitle">' + esc(life.title) + "</span>" +
         '<span class="brole">' + esc(life.tagline) + "</span>";
-      book.addEventListener("click", function () { openReader(i); });
+      book.addEventListener("click", function () {
+        if (window.SoundFX) SoundFX.book();
+        openReader(i);
+      });
       shelf.appendChild(book);
     });
   }
@@ -172,7 +206,7 @@
         '<div class="p-body"><p>' + esc(life.chapters[state.page - 1]) + "</p></div>";
     }
 
-    pageEl.innerHTML = html;
+    pageEl.innerHTML = '<div class="p-scroll">' + html + "</div>";
     pageEl.classList.remove("swap");
     void pageEl.offsetWidth;
     pageEl.classList.add("swap");
@@ -193,8 +227,13 @@
     var total = totalPages(life);
     var next = state.page + d;
     if (next < 0) return;
-    if (next >= total) { closeReader(); return; }
+    if (next >= total) {
+      if (window.SoundFX) SoundFX.close();
+      closeReader();
+      return;
+    }
     state.page = next;
+    if (window.SoundFX) SoundFX.page();
     renderPage();
   }
 
@@ -211,6 +250,7 @@
     });
 
     $("#btn-own-life").addEventListener("click", function () {
+      if (window.SoundFX) SoundFX.click();
       renderEpilogue();
       show("screen-epilogue");
     });
@@ -229,6 +269,7 @@
       box.appendChild(el);
     });
     requestAnimationFrame(function () { drawConstellation(); });
+    if (window.SoundFX) SoundFX.shimmer();
   }
 
   function drawConstellation() {
@@ -342,6 +383,17 @@
   }
 
   function initActions() {
+    /* sound toggle reflects the saved preference */
+    var toggle = $("#sound-toggle");
+    var pressed = !!(window.SoundFX && SoundFX.enabled);
+    toggle.setAttribute("aria-pressed", String(pressed));
+    toggle.addEventListener("click", function () {
+      if (!window.SoundFX) return;
+      var on = SoundFX.toggle();
+      toggle.setAttribute("aria-pressed", String(on));
+      if (on) SoundFX.click();
+    });
+
     $("#btn-download").addEventListener("click", function () {
       downloadText("the-midnight-library-journal.txt", journalText(null));
     });

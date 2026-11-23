@@ -2,23 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>The Midnight Library — An Aspirational Journal</title>
 <meta name="description" content="A fan-made interactive journal inspired by Matt Haig's The Midnight Library. Open the window, borrow a life, and return to your own.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <style>
 /* ============================================================
    The Midnight Library — an aspirational journal
-   Navy night · white serif · a window full of other lives
+   Navy night · white serif · a square glass window that swings
+   open like a real casement window, in 3D.
    ============================================================ */
 
 :root {
-  --navy-0: #050a1c;
+  --navy-0: #04081a;
   --navy-1: #0a1430;
-  --navy-2: #101d42;
-  --ink: #eef2ff;
+  --navy-2: #122046;
+  --ink: #f2f5ff;
   --ink-dim: rgba(238, 242, 255, 0.72);
   --gold: #e6c584;
+  --gold-hi: #ffe9bd;
   --gold-soft: rgba(230, 197, 132, 0.45);
   --serif: "Times New Roman", Times, serif;
 }
@@ -31,690 +33,597 @@ body {
   font-family: var(--serif);
   color: var(--ink);
   background:
-    radial-gradient(1200px 800px at 70% -10%, #14224d 0%, transparent 60%),
-    radial-gradient(900px 700px at 15% 110%, #101c44 0%, transparent 55%),
-    linear-gradient(180deg, var(--navy-0), var(--navy-1) 55%, #060b20);
+    radial-gradient(1400px 900px at 72% -12%, #17265a 0%, transparent 62%),
+    radial-gradient(1100px 800px at 12% 112%, #101d47 0%, transparent 58%),
+    linear-gradient(180deg, var(--navy-0), var(--navy-1) 55%, #050a1f);
   min-height: 100vh;
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 ::selection { background: rgba(230, 197, 132, 0.35); color: #fff; }
 
-#starfield {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  display: block;
-}
+#starfield { position: fixed; inset: 0; z-index: 0; display: block; }
 
 .vignette {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 52%, rgba(2, 5, 15, 0.78) 100%);
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, rgba(2, 5, 15, 0.8) 100%);
 }
 
-/* ---------------- screens ---------------- */
+/* ---------------- screens ----------------
+   .stage uses margin:auto instead of flex-centering so content
+   taller than the viewport can scroll back up to the top.     */
 
 .screen {
-  position: fixed;
-  inset: 0;
-  z-index: 2;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: clamp(1.2rem, 4vw, 3rem);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(16px);
+  position: fixed; inset: 0; z-index: 2;
+  overflow-y: auto; overflow-x: hidden;
+  padding: max(1.1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+           max(1.1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  opacity: 0; visibility: hidden; transform: translateY(16px);
   pointer-events: none;
   transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0.7s;
 }
 
 .screen.active {
-  opacity: 1;
-  visibility: visible;
-  transform: none;
-  pointer-events: auto;
+  opacity: 1; visibility: visible; transform: none; pointer-events: auto;
   transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s;
 }
+
+.stage {
+  margin: auto;                 /* centers when space allows, scrolls when not */
+  width: 100%;
+  min-height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+}
+
+.stage-narrow { max-width: 640px; }
+.stage-wide   { max-width: 1080px; }
+.stage-landing{ max-width: 760px; }
 
 .overline {
   font-variant: small-caps;
   letter-spacing: 0.38em;
-  font-size: clamp(0.72rem, 1.6vw, 0.9rem);
+  font-size: clamp(0.72rem, 1.6vw, 0.92rem);
   color: var(--gold);
-  text-shadow: 0 0 18px rgba(230, 197, 132, 0.35);
-  margin-bottom: 1rem;
+  text-shadow: 0 0 20px rgba(230, 197, 132, 0.4);
+  margin-bottom: 0.9rem;
 }
 
 .screen-title {
-  font-size: clamp(1.7rem, 5vw, 2.8rem);
-  font-weight: normal;
-  letter-spacing: 0.04em;
-  line-height: 1.15;
+  font-size: clamp(1.75rem, 4.6vw, 2.7rem);
+  font-weight: normal; letter-spacing: 0.04em; line-height: 1.15;
   margin-bottom: 0.9rem;
 }
 
 .lede {
-  color: var(--ink-dim);
-  font-style: italic;
-  font-size: clamp(1rem, 2.2vw, 1.15rem);
-  max-width: 46ch;
-  margin-bottom: 1.8rem;
-  line-height: 1.6;
+  color: var(--ink-dim); font-style: italic;
+  font-size: clamp(1rem, 2.1vw, 1.15rem);
+  max-width: 48ch; margin-bottom: 1.7rem; line-height: 1.6;
 }
 
 /* ---------------- landing ---------------- */
 
-#screen-landing { gap: 0.55rem; }
+#screen-landing { gap: 0; }
 
 .site-title {
-  font-size: clamp(2.6rem, 8vw, 5.2rem);
-  font-weight: normal;
-  letter-spacing: 0.1em;
-  line-height: 1.05;
-  text-shadow:
-    0 0 34px rgba(150, 175, 255, 0.45),
-    0 0 90px rgba(120, 150, 255, 0.25);
+  font-size: clamp(2.3rem, 6.4vw, 4.1rem);
+  font-weight: normal; letter-spacing: 0.09em; line-height: 1.06;
+  background: linear-gradient(180deg, #ffffff 8%, #dfe7ff 48%, #93a9ff 82%, #6f86e8 100%);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 2px 22px rgba(140, 165, 255, 0.35));
+  margin-bottom: 0.6rem;
 }
 
 .site-sub {
-  color: var(--ink-dim);
-  font-style: italic;
-  font-size: clamp(1rem, 2.4vw, 1.25rem);
-  margin-bottom: 1.6rem;
+  color: var(--ink-dim); font-style: italic;
+  font-size: clamp(1rem, 2.3vw, 1.22rem);
+  margin-bottom: clamp(0.8rem, 2vh, 1.6rem);
 }
 
-/* ------- the little window ------- */
+/* ------- the square window, in 3D ------- */
 
-.window {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  color: inherit;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 0.5rem;
-  margin: 0.4rem 0 0.6rem;
-}
-
-.window-frame {
-  display: block;
-  width: min(46vmin, 320px);
-  aspect-ratio: 3 / 4;
-  border-radius: 16px;
-  padding: 12px;
-  background: conic-gradient(from 210deg,
-    #67e8f9, #a78bfa, #f0abfc, #fda4af, #fcd34d, #6ee7b7, #67e8f9);
-  box-shadow:
-    0 0 44px rgba(140, 160, 255, 0.28),
-    0 0 120px rgba(120, 140, 255, 0.14),
-    inset 0 0 16px rgba(255, 255, 255, 0.35);
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.6s ease;
+.scene {
   position: relative;
+  width: min(64vmin, 470px);
+  margin: 0 auto clamp(0.8rem, 2vh, 1.5rem);
+  display: flex; flex-direction: column; align-items: center;
 }
 
-.window:hover .window-frame,
-.window:focus-visible .window-frame {
-  transform: scale(1.04);
-  box-shadow:
-    0 0 60px rgba(160, 180, 255, 0.4),
-    0 0 160px rgba(130, 150, 255, 0.22),
-    inset 0 0 18px rgba(255, 255, 255, 0.45);
+.wall-glow {
+  position: absolute; inset: -14% -20% -18%;
+  background: radial-gradient(ellipse 62% 58% at 50% 46%,
+    rgba(255, 214, 140, 0.32) 0%,
+    rgba(255, 196, 120, 0.14) 34%,
+    rgba(120, 140, 255, 0.07) 58%,
+    transparent 76%);
+  opacity: 0.5;
+  filter: blur(10px);
+  transition: opacity 1.4s ease;
+  pointer-events: none;
 }
 
-.window:focus-visible { outline: 2px dashed var(--gold); outline-offset: 8px; border-radius: 18px; }
+.window3d {
+  position: relative; z-index: 1;
+  background: none; border: none; padding: 0; cursor: pointer;
+  perspective: 1250px;
+  perspective-origin: 50% 42%;
+  touch-action: manipulation;
+}
+.window3d:focus-visible { outline: 2px dashed var(--gold); outline-offset: 10px; border-radius: 20px; }
 
-.window-inner {
-  position: absolute;
-  inset: 12px;
-  border-radius: 9px;
-  overflow: hidden;
-  background: radial-gradient(circle at 50% 30%, #26398c 0%, #0d1838 55%, #080f26 100%);
+.window-tilt {
+  display: block;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 50% 62%,
-    rgba(255, 244, 214, 0.95) 0%,
-    rgba(255, 214, 140, 0.5) 28%,
-    rgba(255, 200, 120, 0.12) 48%,
-    transparent 65%);
-  opacity: 0.85;
-  transform: scale(0.94);
-  transition: opacity 1s ease, transform 1.4s ease;
-}
-
-.glass {
-  position: absolute;
-  inset: 0;
+.win-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 14px;
+  padding: clamp(9px, 1.8vmin, 13px);
+  transform-style: preserve-3d;
   background:
-    radial-gradient(1.5px 1.5px at 18% 22%, rgba(255, 255, 255, 0.95), transparent 60%),
-    radial-gradient(1px 1px at 42% 12%, rgba(255, 240, 200, 0.9), transparent 60%),
-    radial-gradient(1.2px 1.2px at 66% 26%, rgba(255, 255, 255, 0.85), transparent 60%),
-    radial-gradient(1px 1px at 82% 16%, rgba(200, 220, 255, 0.9), transparent 60%),
-    radial-gradient(1.4px 1.4px at 55% 45%, rgba(255, 255, 255, 0.8), transparent 60%),
-    radial-gradient(1px 1px at 30% 55%, rgba(255, 220, 230, 0.85), transparent 60%),
-    radial-gradient(1.2px 1.2px at 74% 60%, rgba(255, 255, 255, 0.9), transparent 60%),
-    radial-gradient(1px 1px at 12% 70%, rgba(190, 220, 255, 0.8), transparent 60%),
-    radial-gradient(circle at 50% 62%, rgba(255, 238, 200, 0.28), transparent 55%);
+    linear-gradient(155deg, rgba(255,255,255,.28), rgba(255,255,255,0) 30%),
+    conic-gradient(from 205deg,
+      #6fd8e8, #8f7bf0, #e08ad8, #e8a08f, #e8cf8f, #9fe8b4, #6fd8e8);
+  box-shadow:
+    0 34px 70px -18px rgba(0, 0, 0, 0.75),
+    0 12px 28px -10px rgba(90, 110, 220, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.9s ease;
+}
+.window3d:hover .win-frame {
+  box-shadow:
+    0 44px 90px -18px rgba(0, 0, 0, 0.8),
+    0 16px 40px -10px rgba(110, 130, 240, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.4);
 }
 
-.pane {
+.win-scene {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 50.5%;
-  background: linear-gradient(160deg,
-    rgba(170, 205, 255, 0.22) 0%,
-    rgba(30, 48, 96, 0.5) 45%,
-    rgba(12, 22, 52, 0.72) 100%);
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  transition: transform 1.15s cubic-bezier(0.72, 0, 0.18, 1);
+  inset: clamp(9px, 1.8vmin, 13px);
+  border-radius: 7px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 68%, #f7ead0 0%, #d9b98a 12%, transparent 26%),
+    radial-gradient(circle at 50% 60%, rgba(255, 226, 168, 0.85) 0%, rgba(255, 205, 140, 0.28) 22%, transparent 46%),
+    linear-gradient(180deg, #060c22 0%, #0d1a44 45%, #182a63 72%, #2a3c7e 100%);
 }
 
-.pane-left  { left: 0;  border-radius: 8px 3px 3px 8px; }
-.pane-right { right: 0; border-radius: 3px 8px 8px 3px; }
+.win-sky { position: absolute; inset: 0; }
 
-.mullion {
+.win-core {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 72%,
+    rgba(255, 246, 222, 0.95) 0%,
+    rgba(255, 219, 150, 0.55) 16%,
+    rgba(255, 196, 128, 0.16) 36%,
+    transparent 60%);
+  opacity: 0.9;
+  transform: scale(0.92);
+  transition: opacity 1.2s ease, transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.win-stars i {
+  position: absolute; left: var(--x); top: var(--y);
+  width: calc(var(--s) * 2.4px); height: calc(var(--s) * 2.4px);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.75);
+  animation: twinkle 3.4s ease-in-out var(--d) infinite;
+}
+.win-stars i:nth-child(3n) { background: #ffe9bd; box-shadow: 0 0 6px 1px rgba(255, 233, 189, 0.8); }
+.win-stars i:nth-child(4n) { background: #bcd4ff; box-shadow: 0 0 6px 1px rgba(188, 212, 255, 0.8); }
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.8); }
+  50%      { opacity: 1;    transform: scale(1.15); }
+}
+
+.win-hills {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 30%;
+  background:
+    radial-gradient(60% 130% at 18% 100%, rgba(6, 10, 30, 0.95) 40%, transparent 70%),
+    radial-gradient(70% 150% at 82% 100%, rgba(8, 12, 36, 0.95) 42%, transparent 72%);
+}
+
+/* sashes (the two glass frames that swing open on hinges) */
+
+.sash {
   position: absolute;
-  background: linear-gradient(180deg, rgba(230, 197, 132, 0.75), rgba(150, 130, 90, 0.6));
-  transition: opacity 0.6s ease;
+  top: clamp(9px, 1.8vmin, 13px);
+  bottom: clamp(9px, 1.8vmin, 13px);
+  width: calc(50% - clamp(9px, 1.8vmin, 13px));
+  transform-style: preserve-3d;
+  transition: transform 1.5s cubic-bezier(0.65, 0, 0.18, 1);
+  will-change: transform;
 }
 
-.mullion-v { left: calc(50% - 1px); top: 4%; bottom: 4%; width: 2px; }
-.mullion-h { top: calc(50% - 1px); left: 4%; right: 4%; height: 2px; }
+.sash-left  { left:  clamp(9px, 1.8vmin, 13px); transform-origin: left center; }
+.sash-right { right: clamp(9px, 1.8vmin, 13px); transform-origin: right center; }
 
-.window.open { cursor: default; }
-.window.open .pane-left  { transform: translateX(-104%); }
-.window.open .pane-right { transform: translateX(104%); }
-.window.open .glow     { opacity: 1; transform: scale(1.35); }
-.window.open .mullion  { opacity: 0; }
-.window.open .hint     { opacity: 0; transform: translateY(6px); }
+.window3d.open .sash-left  { transform: rotateY(-114deg); }
+.window3d.open .sash-right { transform: rotateY(114deg); }
+
+.pane-glass {
+  position: absolute; inset: 0;
+  border-radius: 4px;
+  background:
+    linear-gradient(128deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.05) 26%, transparent 45%),
+    linear-gradient(300deg, rgba(180, 210, 255, 0.14) 0%, transparent 40%),
+    linear-gradient(180deg, rgba(140, 180, 255, 0.1), rgba(20, 34, 80, 0.28));
+  -webkit-backdrop-filter: blur(1.5px);
+  backdrop-filter: blur(1.5px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(10, 18, 44, 0.55),
+    inset 0 0 22px rgba(150, 180, 255, 0.12);
+}
+
+.bar {
+  position: absolute;
+  background: linear-gradient(90deg, rgba(240, 225, 200, 0.9), rgba(180, 165, 140, 0.9));
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.4);
+}
+.sash-left  .bar-v { right: 0; top: 0; bottom: 0; width: 5px; }
+.sash-right .bar-v { left: 0;  top: 0; bottom: 0; width: 5px; }
+.bar-h { left: 0; right: 0; top: calc(50% - 2px); height: 5px; }
+.sash-left  .bar-h { background: linear-gradient(180deg, rgba(240,225,200,.9), rgba(180,165,140,.9)); }
+
+.handle {
+  position: absolute; top: calc(50% - 16px);
+  width: 8px; height: 32px; border-radius: 4px;
+  background: linear-gradient(180deg, #f4e9d2, #b9a888);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.sash-left  .handle { right: 9px; }
+.sash-right .handle { left: 9px; }
+
+.hinge {
+  position: absolute; width: 7px; height: 22px; border-radius: 3px;
+  background: linear-gradient(180deg, #cfd6e6, #6e7788);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+.sash-left  .hinge { left: -3px; }
+.sash-right .hinge { right: -3px; }
+.hinge-top    { top: 8%; }
+.hinge-bottom { bottom: 8%; }
+
+.win-sill {
+  display: block;
+  width: 112%; height: clamp(12px, 2.2vmin, 18px);
+  margin-top: -4px;
+  border-radius: 4px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 40%),
+    linear-gradient(180deg, #4a5878, #232c48);
+  box-shadow:
+    0 14px 30px -6px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transform: translateZ(30px);
+}
+
+.floor-light {
+  position: absolute; bottom: -34px; left: 50%;
+  width: 150%; height: 110px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center,
+    rgba(255, 220, 150, 0.42) 0%,
+    rgba(255, 205, 130, 0.14) 45%,
+    transparent 72%);
+  filter: blur(7px);
+  opacity: 0;
+  transition: opacity 1.3s ease 0.25s;
+  pointer-events: none;
+}
+.floor-light.on { opacity: 1; }
+
+.scene.open .wall-glow { opacity: 1; }
+.window3d.open .win-core { opacity: 1; transform: scale(1.28); }
+.hint.gone { opacity: 0 !important; transform: translateY(6px); animation: none; }
+.window3d.open { cursor: default; }
 
 .hint {
-  font-style: italic;
-  font-size: 0.95rem;
-  color: var(--ink-dim);
+  margin-top: clamp(0.9rem, 2.4vh, 1.6rem);
+  font-style: italic; font-size: 0.95rem; color: var(--ink-dim);
   letter-spacing: 0.08em;
   animation: breathe 3.2s ease-in-out infinite;
   transition: opacity 0.5s ease, transform 0.5s ease;
+  z-index: 1;
 }
 
-@keyframes breathe {
-  0%, 100% { opacity: 0.55; }
-  50%      { opacity: 1; }
-}
+@keyframes breathe { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
 
-.welcome-back {
-  font-style: italic;
-  color: var(--gold);
-  font-size: 0.98rem;
-  letter-spacing: 0.04em;
-}
+.welcome-back { font-style: italic; color: var(--gold); font-size: 0.98rem; letter-spacing: 0.04em; }
 
-.landing-foot { margin-top: 2.2rem; }
-
-.teaser {
-  font-style: italic;
-  color: var(--ink-dim);
-  letter-spacing: 0.03em;
-}
-
-.credit {
-  margin-top: 0.7rem;
-  font-size: 0.8rem;
-  color: rgba(238, 242, 255, 0.42);
-}
+.landing-foot { margin-top: clamp(1rem, 3vh, 2rem); }
+.teaser { font-style: italic; color: var(--ink-dim); letter-spacing: 0.03em; }
+.credit { margin-top: 0.7rem; font-size: 0.8rem; color: rgba(238, 242, 255, 0.42); }
 
 /* ---------------- buttons ---------------- */
 
 .btn {
   font-family: var(--serif);
-  font-size: 0.85rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  font-size: 0.85rem; letter-spacing: 0.22em; text-transform: uppercase;
   color: var(--gold);
-  background: transparent;
+  background: linear-gradient(180deg, rgba(230, 197, 132, 0.08), rgba(230, 197, 132, 0.02));
   border: 1px solid var(--gold-soft);
   border-radius: 999px;
   padding: 0.9rem 1.9rem;
   cursor: pointer;
-  transition: background 0.35s ease, box-shadow 0.35s ease, color 0.35s ease, transform 0.25s ease;
+  transition: background 0.35s ease, box-shadow 0.35s ease, color 0.35s ease, transform 0.25s ease, border-color .35s ease;
 }
-
 .btn:hover {
-  background: rgba(230, 197, 132, 0.12);
-  box-shadow: 0 0 26px rgba(230, 197, 132, 0.28);
+  background: rgba(230, 197, 132, 0.16);
+  border-color: rgba(230, 197, 132, 0.75);
+  box-shadow: 0 0 28px rgba(230, 197, 132, 0.3);
   color: #fff8e7;
   transform: translateY(-1px);
 }
-
 .btn:active { transform: translateY(0); }
-
 .btn:focus-visible { outline: 2px dashed var(--gold); outline-offset: 4px; }
-
 .btn-ghost { border-color: rgba(238, 242, 255, 0.25); color: var(--ink-dim); }
-.btn-ghost:hover { color: var(--ink); box-shadow: 0 0 20px rgba(238, 242, 255, 0.15); }
-
+.btn-ghost:hover { color: var(--ink); border-color: rgba(238,242,255,.5); box-shadow: 0 0 20px rgba(238, 242, 255, 0.15); }
 .btn-small { padding: 0.55rem 1.1rem; font-size: 0.72rem; }
 
 /* ---------------- form ---------------- */
 
-.form-wrap { display: flex; flex-direction: column; align-items: center; max-width: 660px; width: 100%; }
-
 .card {
   width: 100%;
   text-align: left;
-  background: linear-gradient(180deg, rgba(16, 29, 66, 0.82), rgba(9, 16, 38, 0.88));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0) 22%),
+    linear-gradient(180deg, rgba(16, 29, 66, 0.85), rgba(9, 16, 38, 0.9));
   border: 1px solid rgba(230, 197, 132, 0.28);
   border-radius: 18px;
-  padding: clamp(1.5rem, 4vw, 2.6rem);
-  box-shadow:
-    0 30px 80px rgba(0, 0, 0, 0.55),
-    inset 0 0 40px rgba(20, 34, 80, 0.4);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
-  display: flex;
-  flex-direction: column;
-  gap: 1.3rem;
+  padding: clamp(1.5rem, 4vw, 2.4rem);
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.6), inset 0 0 46px rgba(20, 34, 80, 0.45);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  display: flex; flex-direction: column; gap: 1.25rem;
 }
 
-.field-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
-}
-
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.15rem; }
 .field { display: flex; flex-direction: column; gap: 0.45rem; }
 
 .field label {
-  font-variant: small-caps;
-  letter-spacing: 0.24em;
-  font-size: 0.82rem;
-  color: var(--gold);
+  font-variant: small-caps; letter-spacing: 0.24em;
+  font-size: 0.82rem; color: var(--gold);
 }
 
-.field input,
-.field textarea {
-  font-family: var(--serif);
-  font-size: 1.05rem;
-  color: var(--ink);
+.field input, .field textarea {
+  font-family: var(--serif); font-size: 1.05rem; color: var(--ink);
   background: rgba(5, 10, 28, 0.55);
-  border: none;
-  border-bottom: 1px solid rgba(238, 242, 255, 0.28);
+  border: none; border-bottom: 1px solid rgba(238, 242, 255, 0.28);
   border-radius: 6px 6px 0 0;
   padding: 0.65rem 0.7rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
-
 .field textarea { resize: vertical; line-height: 1.55; }
-
-.field input::placeholder,
-.field textarea::placeholder { color: rgba(238, 242, 255, 0.34); font-style: italic; }
-
-.field input:focus,
-.field textarea:focus {
-  outline: none;
-  border-bottom-color: var(--gold);
+.field input::placeholder, .field textarea::placeholder { color: rgba(238, 242, 255, 0.34); font-style: italic; }
+.field input:focus, .field textarea:focus {
+  outline: none; border-bottom-color: var(--gold);
   background: rgba(5, 10, 28, 0.8);
   box-shadow: 0 1px 0 var(--gold), 0 8px 24px -12px rgba(230, 197, 132, 0.35);
 }
-
 .card .btn-primary { align-self: center; margin-top: 0.4rem; }
 
-.fineprint {
-  text-align: center;
-  font-size: 0.8rem;
-  font-style: italic;
-  color: rgba(238, 242, 255, 0.4);
-  letter-spacing: 0.03em;
-}
+.fineprint { text-align: center; font-size: 0.8rem; font-style: italic; color: rgba(238, 242, 255, 0.4); letter-spacing: 0.03em; }
 
 /* ---------------- shelf ---------------- */
 
-.lib-wrap { display: flex; flex-direction: column; align-items: center; max-width:960px; width: 100%; }
-
 .shelf {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: clamp(1rem, 3vw, 2rem);
-  margin: 1.2rem 0 2rem;
-  perspective: 900px;
+  display: flex; flex-wrap: wrap; justify-content: center;
+  gap: clamp(1rem, 3vw, 1.8rem);
+  margin: 0.4rem 0 1.8rem;
+  perspective: 1000px;
 }
 
 .book {
-  --c1: #3730a3;
-  --c2: #7c3aed;
-  width: 200px;
-  height: 296px;
-  border: none;
-  border-radius: 6px 10px 10px 6px;
-  background: linear-gradient(150deg, var(--c1) 0%, var(--c2) 100%);
+  --c1: #3730a3; --c2: #7c3aed;
+  width: 196px; height: 268px;
+  border: none; border-radius: 7px 11px 11px 7px;
+  background:
+    linear-gradient(105deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0) 26%),
+    linear-gradient(150deg, var(--c1) 0%, var(--c2) 100%);
   box-shadow:
     -8px 10px 26px rgba(0, 0, 0, 0.55),
     inset 0 0 0 1px rgba(255, 255, 255, 0.14),
     inset -10px 0 18px rgba(0, 0, 0, 0.4);
-  cursor: pointer;
-  font-family: var(--serif);
-  color: #fdfbf5;
-  position: relative;
-  text-align: center;
+  cursor: pointer; font-family: var(--serif); color: #fdfbf5;
+  position: relative; text-align: center;
   transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
 }
-
 .book::before {
-  content: "";
-  position: absolute;
-  left: 8px;
-  top: 6px;
-  bottom: 6px;
-  width: 3px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.35);
+  content: ""; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 3px;
+  border-radius: 3px; background: rgba(0, 0, 0, 0.35);
   box-shadow: 1px 0 0 rgba(255, 255, 255, 0.12);
 }
-
 .book::after {
-  content: "\2726";
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.65);
+  content: "\2726"; position: absolute; top: 10px; right: 10px;
+  font-size: 0.7rem; color: rgba(255, 255, 255, 0.65);
 }
-
-.book:hover,
-.book:focus-visible {
+.book:hover, .book:focus-visible {
   transform: translateY(-14px) rotate(-1.4deg);
   box-shadow:
     -8px 14px 30px rgba(0, 0, 0, 0.55),
     0 22px 46px -14px var(--c1),
     inset 0 0 0 1px rgba(255, 255, 255, 0.22);
 }
-
 .book:focus-visible { outline: 2px dashed var(--gold); outline-offset: 5px; }
 
 .book .vol {
-  position: absolute;
-  top: 16px;
-  left: 0;
-  right: 0;
-  font-size: 0.62rem;
-  letter-spacing: 0.3em;
-  color: rgba(255, 235, 190, 0.9);
-  text-transform: uppercase;
+  position: absolute; top: 15px; left: 0; right: 0;
+  font-size: 0.62rem; letter-spacing: 0.3em;
+  color: rgba(255, 235, 190, 0.9); text-transform: uppercase;
 }
-
 .book .btitle {
-  position: absolute;
-  top: 48px;
-  bottom: 44px;
-  left: 8px;
-  right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: absolute; top: 46px; bottom: 44px; left: 8px; right: 8px;
+  display: flex; align-items: center; justify-content: center;
   writing-mode: vertical-rl;
-  font-size: 1.05rem;
-  letter-spacing: 0.05em;
-  line-height: 1.25;
+  font-size: 1.02rem; letter-spacing: 0.05em; line-height: 1.25;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
-
 .book .brole {
-  position: absolute;
-  bottom: 12px;
-  left: 12px;
-  right: 12px;
-  font-style: italic;
-  font-size: 0.76rem;
-  line-height: 1.3;
+  position: absolute; bottom: 11px; left: 12px; right: 12px;
+  font-style: italic; font-size: 0.75rem; line-height: 1.3;
   color: rgba(255, 255, 255, 0.78);
 }
 
-.lib-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.9rem;
-  margin-bottom: 1.2rem;
-}
+.lib-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.9rem; margin-bottom: 1.1rem; }
 
-/* ---------------- reader ---------------- */
+/* ---------------- reader (square page) ---------------- */
 
 .reader {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  background: rgba(4, 8, 22, 0.88);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  padding: clamp(0.8rem, 3vw, 2rem);
-  overflow-y: auto;
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(4, 8, 22, 0.9);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.9rem; padding: max(0.8rem, env(safe-area-inset-top)) 1rem;
+  overflow: hidden;
 }
-
 .reader[hidden] { display: none; }
 
-.reader-top {
-  width: min(680px, 94vw);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.reader-crumb {
-  font-variant: small-caps;
-  letter-spacing: 0.3em;
-  font-size: 0.8rem;
-  color: var(--gold);
-}
-
+.reader-top { width: min(560px, 94vw); display: flex; justify-content: space-between; align-items: center; }
+.reader-crumb { font-variant: small-caps; letter-spacing: 0.3em; font-size: 0.8rem; color: var(--gold); }
 .reader-close {
-  background: none;
-  border: 1px solid rgba(238, 242, 255, 0.25);
-  color: var(--ink-dim);
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 0.9rem;
+  background: none; border: 1px solid rgba(238, 242, 255, 0.25); color: var(--ink-dim);
+  width: 38px; height: 38px; border-radius: 50%; cursor: pointer; font-size: 0.9rem;
   transition: all 0.3s ease;
 }
-
 .reader-close:hover { color: #fff; border-color: var(--gold); box-shadow: 0 0 16px rgba(230, 197, 132, 0.3); }
 
 .page {
-  width: min(680px, 94vw);
-  max-height: 64vh;
-  overflow-y: auto;
-  background: linear-gradient(180deg, #0e1a3d 0%, #081130 100%);
+  width: min(560px, 94vw);
+  aspect-ratio: 4 / 3;
+  max-height: 68vh;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0) 18%),
+    linear-gradient(180deg, #0e1a3d 0%, #081130 100%);
   border: 1px solid rgba(230, 197, 132, 0.3);
   border-radius: 14px;
-  padding: clamp(1.6rem, 4.5vw, 3.2rem);
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.65), inset 0 0 60px rgba(16, 29, 66, 0.5);
+  box-shadow: 0 44px 110px rgba(0, 0, 0, 0.7), inset 0 0 60px rgba(16, 29, 66, 0.5);
+  overflow: hidden;
+}
+.page.swap .p-scroll { animation: pageIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes pageIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.p-scroll {
+  height: 100%; overflow-y: auto;
+  padding: clamp(1.3rem, 3.6vw, 2.4rem);
   text-align: left;
 }
 
-.page.swap { animation: pageIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
-
-@keyframes pageIn {
-  from { opacity: 0; transform: translateY(14px); }
-  to   { opacity: 1; transform: none; }
-}
-
 .page .p-vol {
-  font-variant: small-caps;
-  letter-spacing: 0.32em;
-  font-size: 0.75rem;
-  color: var(--gold);
-  text-align: center;
-  margin-bottom: 1.1rem;
+  font-variant: small-caps; letter-spacing: 0.32em; font-size: 0.75rem;
+  color: var(--gold); text-align: center; margin-bottom: 1rem;
 }
-
-.page h3 {
-  font-weight: normal;
-  font-size: clamp(1.35rem, 3.4vw, 1.9rem);
-  letter-spacing: 0.03em;
-  text-align: center;
-  line-height: 1.25;
-}
-
-.page .p-role {
-  text-align: center;
-  font-style: italic;
-  color: var(--ink-dim);
-  margin-top: 0.5rem;
-}
-
+.page h3 { font-weight: normal; font-size: clamp(1.3rem, 3.2vw, 1.8rem); letter-spacing: 0.03em; text-align: center; line-height: 1.25; }
+.page .p-role { text-align: center; font-style: italic; color: var(--ink-dim); margin-top: 0.45rem; }
 .page .rule {
-  border: none;
-  height: 1px;
-  margin: 1.4rem auto;
-  width: 55%;
+  border: none; height: 1px; margin: 1.2rem auto; width: 55%;
   background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
 }
-
 .page .chapter-label {
-  font-variant: small-caps;
-  letter-spacing: 0.3em;
-  font-size: 0.8rem;
-  color: var(--gold);
-  text-align: center;
-  margin-bottom: 1.2rem;
+  font-variant: small-caps; letter-spacing: 0.3em; font-size: 0.8rem;
+  color: var(--gold); text-align: center; margin-bottom: 1rem;
 }
-
 .page .p-body p {
-  line-height: 1.9;
-  margin: 1.05em 0;
-  color: #e8ecff;
-  font-size: 1.05rem;
-  text-indent: 1.5em;
+  line-height: 1.85; margin: 0.9em 0; color: #e8ecff;
+  font-size: 1.02rem; text-indent: 1.4em;
 }
-
 .page .p-body p:first-child { text-indent: 0; }
-
 .page .p-body p:first-of-type::first-letter {
-  font-size: 3.1em;
-  float: left;
-  line-height: 0.82;
-  padding: 0.06em 0.14em 0 0;
-  color: var(--gold);
+  font-size: 2.9em; float: left; line-height: 0.82;
+  padding: 0.05em 0.13em 0 0; color: var(--gold);
   text-shadow: 0 0 18px rgba(230, 197, 132, 0.4);
 }
-
-.cover-ornament {
-  text-align: center;
-  color: var(--gold);
-  font-size: 1.3rem;
-  letter-spacing: 0.6em;
-  margin: 1.1rem 0;
-}
-
-.belongs {
-  text-align: center;
-  font-style: italic;
-  color: var(--ink-dim);
-  margin-top: 1.6rem;
-  line-height: 1.7;
-}
-
+.cover-ornament { text-align: center; color: var(--gold); font-size: 1.2rem; letter-spacing: 0.6em; margin: 1rem 0; }
+.belongs { text-align: center; font-style: italic; color: var(--ink-dim); margin-top: 1.4rem; line-height: 1.7; }
 .belongs strong { color: var(--ink); font-weight: normal; }
-
 .dl-link {
-  display: block;
-  margin: 1.6rem auto 0;
-  background: none;
-  border: none;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 0.88rem;
-  color: var(--gold);
-  cursor: pointer;
-  border-bottom: 1px dotted var(--gold-soft);
-  padding-bottom: 2px;
+  display: block; margin: 1.4rem auto 0; background: none; border: none;
+  font-family: var(--serif); font-style: italic; font-size: 0.88rem; color: var(--gold);
+  cursor: pointer; border-bottom: 1px dotted var(--gold-soft); padding-bottom: 2px;
 }
-
 .dl-link:hover { color: #fff8e7; }
 
-.pager {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: min(680px, 94vw);
-  gap: 1rem;
-}
-
-.pg-count {
-  font-variant: small-caps;
-  letter-spacing: 0.26em;
-  font-size: 0.72rem;
-  color: var(--ink-dim);
-}
+.pager { display: flex; justify-content: space-between; align-items: center; width: min(560px, 94vw); gap: 0.8rem; }
+.pg-count { font-variant: small-caps; letter-spacing: 0.26em; font-size: 0.72rem; color: var(--ink-dim); }
 
 /* ---------------- epilogue ---------------- */
 
-.epi-wrap { display: flex; flex-direction: column; align-items: center; max-width: 720px; width: 100%; }
+#constellation { width: min(560px, 88vw); height: 110px; margin: 0.3rem 0 1rem; }
 
-#constellation {
-  width: min(620px, 88vw);
-  height: 120px;
-  margin: 0.4rem 0 1.2rem;
-}
-
-.epi-text {
-  max-width: 58ch;
-  font-size: clamp(1.02rem, 2.2vw, 1.18rem);
-  line-height: 1.95;
-  color: #e8ecff;
-}
-
-.epi-text p { margin: 1em 0; }
-
+.epi-text { max-width: 56ch; font-size: clamp(1rem, 2.1vw, 1.14rem); line-height: 1.9; color: #e8ecff; }
+.epi-text p { margin: 0.9em 0; }
 .epi-text p:last-child {
-  font-variant: small-caps;
-  letter-spacing: 0.28em;
-  color: var(--gold);
-  font-size: 1.05rem;
+  font-variant: small-caps; letter-spacing: 0.28em;
+  color: var(--gold); font-size: 1.02rem; text-align: center;
 }
+
+/* ---------------- sound toggle ---------------- */
+
+.sound-toggle {
+  position: fixed; right: max(0.9rem, env(safe-area-inset-right)); bottom: max(0.9rem, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex; align-items: center; gap: 0.5rem;
+  font-family: var(--serif); font-variant: small-caps; letter-spacing: 0.18em; font-size: 0.75rem;
+  color: var(--gold);
+  background: rgba(10, 20, 48, 0.72);
+  border: 1px solid var(--gold-soft);
+  border-radius: 999px; padding: 0.55rem 0.95rem;
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: background .3s ease, box-shadow .3s ease, color .3s ease;
+}
+.sound-toggle:hover { background: rgba(20, 34, 80, 0.85); box-shadow: 0 0 20px rgba(230, 197, 132, 0.25); }
+.sound-toggle:focus-visible { outline: 2px dashed var(--gold); outline-offset: 3px; }
+.sound-toggle .mute-line { display: none; }
+.sound-toggle[aria-pressed="false"] .mute-line { display: block; }
+.sound-toggle[aria-pressed="false"] .wav { display: none; }
+.sound-toggle[aria-pressed="false"] { color: var(--ink-dim); }
 
 .noscript {
-  position: fixed;
-  inset: auto 0 0 0;
-  background: #1a0505;
-  color: #ffd9d9;
-  text-align: center;
-  padding: 1rem;
-  z-index: 99;
-  font-family: var(--serif);
+  position: fixed; inset: auto 0 0 0; background: #1a0505; color: #ffd9d9;
+  text-align: center; padding: 1rem; z-index: 99; font-family: var(--serif);
 }
 
-/* ---------------- responsive & motion ---------------- */
+/* ---------------- responsive ---------------- */
 
-@media (max-width: 560px) {
-  .field-grid { grid-template-columns: 1fr; }
-  .book { width: 168px; height: 250px; }
-  .book .btitle { top: 44px; bottom: 42px; font-size: 0.95rem; }
+@media (max-width: 720px) {
+  .scene { width: min(78vw, 400px); }
+  .site-title { font-size: clamp(2rem, 9vw, 3rem); }
+  .book { width: 172px; height: 236px; }
+  .book .btitle { top: 42px; bottom: 40px; font-size: 0.94rem; }
   .book .brole { font-size: 0.7rem; }
-  .page { max-height: 68vh; }
-  .pager { flex-wrap: wrap; justify-content: center; }
+  #constellation { height: 92px; }
+  .reader-top, .pager { width: min(560px, 92vw); }
+}
+
+@media (max-width: 480px) {
+  .field-grid { grid-template-columns: 1fr; }
+  .shelf { gap: 0.9rem; }
+  .book { width: 158px; height: 218px; }
+  .book .btitle { font-size: 0.88rem; }
+  .sound-toggle span { display: none; }       /* icon-only on small screens */
+  .sound-toggle { padding: 0.6rem; }
+  .page { max-height: 72vh; }
+}
+
+@media (max-height: 560px) {
+  .scene { width: min(52vh, 380px); }
+  .site-title { font-size: clamp(1.6rem, 4.5vh, 2.4rem); }
+  .site-sub { margin-bottom: 0.5rem; }
+  .landing-foot { margin-top: 0.8rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -734,35 +643,76 @@ body {
 
 <!-- ================= LANDING ================= -->
 <main id="screen-landing" class="screen active" aria-label="Welcome">
-  <p class="overline">Between life and death there is a library</p>
-  <h1 class="site-title">The Midnight<br>Library</h1>
-  <p class="site-sub">An aspirational journal for the lives we almost lived.</p>
+  <div class="stage stage-landing">
+    <p class="overline">Between life and death there is a library</p>
+    <h1 class="site-title">The Midnight<br>Library</h1>
+    <p class="site-sub">An aspirational journal for the lives we almost lived.</p>
 
-  <button id="window-door" class="window" aria-label="Open the window into the library" aria-expanded="false">
-    <span class="window-frame">
-      <span class="window-inner">
-        <span class="glow"></span>
-        <span class="glass"></span>
-        <span class="pane pane-left"></span>
-        <span class="pane pane-right"></span>
-        <span class="mullion mullion-v"></span>
-        <span class="mullion mullion-h"></span>
-      </span>
-    </span>
-    <span class="hint">Click the window to open it</span>
-  </button>
+    <div class="scene">
+      <div class="wall-glow" aria-hidden="true"></div>
 
-  <p id="welcome-back" class="welcome-back" hidden></p>
+      <button id="window-door" class="window3d" aria-label="Open the window into the library" aria-expanded="false">
+        <span class="window-tilt">
+          <span class="win-frame">
+            <span class="win-scene" aria-hidden="true">
+              <span class="win-sky"></span>
+              <span class="win-core"></span>
+              <span class="win-stars">
+                <i style="--x:12%;--y:18%;--d:0s;--s:1.4"></i>
+                <i style="--x:28%;--y:9%;--d:.7s;--s:1"></i>
+                <i style="--x:47%;--y:14%;--d:1.3s;--s:1.8"></i>
+                <i style="--x:63%;--y:7%;--d:.4s;--s:1.1"></i>
+                <i style="--x:79%;--y:16%;--d:1.9s;--s:1.5"></i>
+                <i style="--x:90%;--y:28%;--d:1s;--s:.9"></i>
+                <i style="--x:8%;--y:44%;--d:2.2s;--s:1.2"></i>
+                <i style="--x:35%;--y:38%;--d:.2s;--s:1"></i>
+                <i style="--x:56%;--y:31%;--d:1.6s;--s:1.6"></i>
+                <i style="--x:72%;--y:45%;--d:.9s;--s:1.3"></i>
+                <i style="--x:20%;--y:62%;--d:2.6s;--s:1.1"></i>
+                <i style="--x:66%;--y:66%;--d:.5s;--s:1.4"></i>
+                <i style="--x:86%;--y:72%;--d:1.2s;--s:1"></i>
+                <i style="--x:42%;--y:78%;--d:2.1s;--s:1.2"></i>
+              </span>
+              <span class="win-hills"></span>
+            </span>
 
-  <footer class="landing-foot">
-    <p class="teaser">Some lives must be borrowed before the one you have is seen.</p>
-    <p class="credit">A fan-made tribute, inspired by Matt Haig&rsquo;s <em>The Midnight Library</em>.</p>
-  </footer>
+            <span class="sash sash-left" aria-hidden="true">
+              <span class="pane-glass"></span>
+              <span class="bar bar-v"></span>
+              <span class="bar bar-h"></span>
+              <span class="handle"></span>
+              <span class="hinge hinge-top"></span>
+              <span class="hinge hinge-bottom"></span>
+            </span>
+            <span class="sash sash-right" aria-hidden="true">
+              <span class="pane-glass"></span>
+              <span class="bar bar-v"></span>
+              <span class="bar bar-h"></span>
+              <span class="handle"></span>
+              <span class="hinge hinge-top"></span>
+              <span class="hinge hinge-bottom"></span>
+            </span>
+          </span>
+          <span class="win-sill" aria-hidden="true"></span>
+        </span>
+      </button>
+
+      <span class="floor-light" aria-hidden="true"></span>
+      <span class="hint" id="window-hint">Click the window to open it</span>
+    </div>
+
+    <p id="welcome-back" class="welcome-back" hidden></p>
+
+    <footer class="landing-foot">
+      <p class="teaser">Some lives must be borrowed before the one you have is seen.</p>
+      <p class="credit">A fan-made tribute, inspired by Matt Haig&rsquo;s <em>The Midnight Library</em>.</p>
+    </footer>
+  </div>
 </main>
 
 <!-- ================= DETAILS FORM ================= -->
 <section id="screen-form" class="screen" aria-label="Your details">
-  <div class="form-wrap">
+  <div class="stage stage-narrow">
     <p class="overline">Step through</p>
     <h2 class="screen-title">Tell the library who you are</h2>
     <p class="lede">Before the doors can open, the librarian asks for three small truths.</p>
@@ -792,10 +742,10 @@ body {
 
 <!-- ================= SHELF OF LIVES ================= -->
 <section id="screen-library" class="screen" aria-label="The shelf of borrowed lives">
-  <div class="lib-wrap">
+  <div class="stage stage-wide">
     <p class="overline">The library of lives</p>
     <h2 class="screen-title" id="library-title">Welcome, traveler.</h2>
-    <p class="lede" id="library-lede">Three volumes have been pulled for you. Borrow one — or return to your own life.</p>
+    <p class="lede" id="library-lede">Three volumes have been pulled for you, from the shelf nearest your wishing heart.</p>
 
     <div id="shelf" class="shelf"></div>
 
@@ -823,7 +773,7 @@ body {
 
 <!-- ================= EPILOGUE ================= -->
 <section id="screen-epilogue" class="screen" aria-label="Epilogue">
-  <div class="epi-wrap">
+  <div class="stage stage-narrow">
     <p class="overline">Epilogue</p>
     <h2 class="screen-title">The Most Perfect Role</h2>
     <canvas id="constellation" aria-hidden="true"></canvas>
@@ -835,11 +785,24 @@ body {
   </div>
 </section>
 
+<button id="sound-toggle" class="sound-toggle" aria-pressed="true" aria-label="Toggle sound">
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+    <path class="spk" d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>
+    <path class="wav wav-1" d="M16 9c1.2 1 1.2 5 0 6" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round"/>
+    <path class="wav wav-2" d="M18.5 7c2.2 2 2.2 10 0 10" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round"/>
+    <line class="mute-line" x1="4" y1="4" x2="20" y2="20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+  <span id="sound-label">Sound</span>
+</button>
+
 <noscript><p class="noscript">The library needs JavaScript to open its doors.</p></noscript>
 
 <script>
-/* The Midnight Library — night sky
-   A field of slowly twinkling stars with the occasional shooting star. */
+/* ============================================================
+   The Midnight Library — night sky
+   Layered starfield: faint far stars, glowing near stars,
+   slow parallax drift, a soft nebula wash, shooting stars.
+   ============================================================ */
 (function () {
   "use strict";
 
@@ -847,74 +810,165 @@ body {
   if (!canvas || !canvas.getContext) return;
 
   var ctx = canvas.getContext("2d");
-  if (!ctx) return; // canvas unsupported (e.g. very old browsers) — night sky stays plain navy
-  var reduced = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  if (!ctx) return; // canvas unsupported — night sky stays plain navy
 
-  var W = 0, H = 0;
-  var stars = [];
+  var reduced = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  var W = 0, H = 0, DPR = 1;
+  var far = [], near = [];
   var meteors = [];
-  var nextMeteor = 3500; // ms until first meteor
+  var nextMeteor = 4000;
   var last = 0;
 
   var PALETTE = [
-    [255, 255, 255],   // white
-    [214, 228, 255],   // ice blue
-    [255, 230, 168],   // warm gold
-    [255, 214, 224]    // faint rose
+    [255, 255, 255],
+    [214, 228, 255],
+    [255, 230, 168],
+    [255, 214, 224]
   ];
 
+  /* pre-rendered soft-glow sprite for the brighter stars */
+  function makeGlowSprite(rgb) {
+    var s = document.createElement("canvas");
+    s.width = s.height = 64;
+    var c = s.getContext("2d");
+    if (!c) return null;
+    var g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, "rgba(255,255,255,1)");
+    g.addColorStop(0.18, "rgba(" + rgb + ",0.9)");
+    g.addColorStop(0.45, "rgba(" + rgb + ",0.25)");
+    g.addColorStop(1, "rgba(" + rgb + ",0)");
+    c.fillStyle = g;
+    c.fillRect(0, 0, 64, 64);
+    return s;
+  }
+
+  var SPRITES = {};
+  PALETTE.forEach(function (p) { SPRITES[p.join(",")] = makeGlowSprite(p.join(",")); });
+
+  /* one static wash of deep-space colour, drawn scaled each frame */
+  var nebula = null;
+  function buildNebula() {
+    nebula = document.createElement("canvas");
+    nebula.width = Math.max(2, Math.floor(W / 3));
+    nebula.height = Math.max(2, Math.floor(H / 3));
+    var c = nebula.getContext("2d");
+    if (!c) return;
+    var blobs = [
+      [0.22, 0.25, 0.55, "79, 70, 229", 0.16],   // indigo
+      [0.8, 0.2, 0.45, "13, 148, 136", 0.10],   // teal
+      [0.7, 0.85, 0.5, "192, 38, 107", 0.08],   // magenta
+      [0.3, 0.9, 0.4, "30, 64, 175", 0.12]      // blue
+    ];
+    blobs.forEach(function (b) {
+      var x = b[0] * nebula.width, y = b[1] * nebula.height, r = b[2] * Math.max(nebula.width, nebula.height);
+      var g = c.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, "rgba(" + b[3] + "," + b[4] + ")");
+      g.addColorStop(1, "rgba(" + b[3] + ",0)");
+      c.fillStyle = g;
+      c.fillRect(0, 0, nebula.width, nebula.height);
+    });
+  }
+
   function resize() {
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth;
-    H = window.innerHeight;
-    canvas.width = Math.floor(W * dpr);
-    canvas.height = Math.floor(H * dpr);
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = Math.floor(W * DPR);
+    canvas.height = Math.floor(H * DPR);
     canvas.style.width = W + "px";
     canvas.style.height = H + "px";
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     seed();
+    buildNebula();
   }
 
   function seed() {
-    var count = Math.max(90, Math.min(260, Math.round((W * H) / 8500)));
-    stars = [];
-    for (var i = 0; i < count; i++) {
-      stars.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        r: 0.3 + Math.random() * 1.35,
-        base: 0.3 + Math.random() * 0.65,
+    var area = W * H;
+    var nFar = Math.max(120, Math.min(420, Math.round(area / 5200)));
+    var nNear = Math.max(24, Math.min(90, Math.round(area / 22000)));
+    far = []; near = [];
+    var i;
+    for (i = 0; i < nFar; i++) {
+      far.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: 0.3 + Math.random() * 0.7,
+        base: 0.25 + Math.random() * 0.5,
         phase: Math.random() * Math.PI * 2,
-        speed: 0.4 + Math.random() * 1.1,
-        c: PALETTE[Math.floor(Math.random() * PALETTE.length)]
+        speed: 0.3 + Math.random() * 0.9,
+        vx: -(0.3 + Math.random() * 0.7),
+        vy: 0.15 + Math.random() * 0.4,
+        c: PALETTE[(Math.random() * PALETTE.length) | 0]
+      });
+    }
+    for (i = 0; i < nNear; i++) {
+      near.push({
+        x: Math.random() * W, y: Math.random() * H,
+        r: 0.9 + Math.random() * 1.4,
+        base: 0.5 + Math.random() * 0.5,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 1.2,
+        vx: -(0.15 + Math.random() * 0.35),
+        vy: 0.08 + Math.random() * 0.2,
+        c: PALETTE[(Math.random() * PALETTE.length) | 0]
       });
     }
   }
 
-  function drawSky(t) {
+  function drawSky(t, dt) {
     ctx.clearRect(0, 0, W, H);
 
-    for (var i = 0; i < stars.length; i++) {
-      var s = stars[i];
-      var tw = s.base * (0.55 + 0.45 * Math.sin(t * 0.001 * s.speed + s.phase));
+    if (nebula) {
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(nebula, 0, 0, W, H);
+      ctx.globalAlpha = 1;
+    }
+
+    var i, s, tw;
+    for (i = 0; i < far.length; i++) {
+      s = far[i];
+      s.x += s.vx * dt * 0.004;
+      s.y += s.vy * dt * 0.004;
+      if (s.x < -2) s.x = W + 2;
+      if (s.y > H + 2) s.y = -2;
+      tw = s.base * (0.55 + 0.45 * Math.sin(t * 0.001 * s.speed + s.phase));
       ctx.globalAlpha = tw;
       ctx.fillStyle = "rgb(" + s.c[0] + "," + s.c[1] + "," + s.c[2] + ")";
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
       ctx.fill();
     }
+
+    for (i = 0; i < near.length; i++) {
+      s = near[i];
+      s.x += s.vx * dt * 0.004;
+      s.y += s.vy * dt * 0.004;
+      if (s.x < -20) s.x = W + 20;
+      if (s.y > H + 20) s.y = -20;
+      tw = s.base * (0.5 + 0.5 * Math.sin(t * 0.001 * s.speed + s.phase));
+      var spr = SPRITES[s.c.join(",")];
+      var size = s.r * 9;
+      if (spr) {
+        ctx.globalAlpha = tw;
+        ctx.drawImage(spr, s.x - size / 2, s.y - size / 2, size, size);
+      } else {
+        ctx.globalAlpha = tw;
+        ctx.fillStyle = "rgb(" + s.c[0] + "," + s.c[1] + "," + s.c[2] + ")";
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
     ctx.globalAlpha = 1;
   }
 
   function spawnMeteor(t) {
-    var sx = W * (0.25 + Math.random() * 0.7);
-    var sy = Math.random() * H * 0.35;
-    var speed = 5 + Math.random() * 4;                 // px per ~16ms step
-    var angle = Math.PI * (0.12 + Math.random() * 0.1); // shallow downward slope
+    var sx = W * (0.3 + Math.random() * 0.65);
+    var sy = Math.random() * H * 0.32;
+    var speed = 5 + Math.random() * 4;
+    var angle = Math.PI * (0.12 + Math.random() * 0.1);
     meteors.push({
       x: sx, y: sy,
-      vx: -Math.cos(angle) * speed,                    // drift left…
-      vy: Math.sin(angle) * speed,                     // …and gently down
+      vx: -Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
       born: t,
       life: 900 + Math.random() * 500
     });
@@ -925,30 +979,21 @@ body {
     for (var i = meteors.length - 1; i >= 0; i--) {
       var m = meteors[i];
       var age = t - m.born;
-      if (age > m.life || m.x < -80 || m.y > H + 80) {
-        meteors.splice(i, 1);
-        continue;
-      }
+      if (age > m.life || m.x < -80 || m.y > H + 80) { meteors.splice(i, 1); continue; }
       m.x += m.vx * dt * 0.06;
       m.y += m.vy * dt * 0.06;
-
       var fade = 1 - age / m.life;
-      var tailX = m.x - m.vx * 26;
-      var tailY = m.y - m.vy * 26;
-
-      var grad = ctx.createLinearGradient(m.x, m.y, tailX, tailY);
-      grad.addColorStop(0, "rgba(255, 246, 220," + (0.9 * fade) + ")");
-      grad.addColorStop(1, "rgba(255, 246, 220, 0)");
-
+      var grad = ctx.createLinearGradient(m.x, m.y, m.x - m.vx * 26, m.y - m.vy * 26);
+      grad.addColorStop(0, "rgba(255,246,220," + (0.9 * fade) + ")");
+      grad.addColorStop(1, "rgba(255,246,220,0)");
       ctx.strokeStyle = grad;
       ctx.lineWidth = 1.6;
       ctx.lineCap = "round";
       ctx.beginPath();
       ctx.moveTo(m.x, m.y);
-      ctx.lineTo(tailX, tailY);
+      ctx.lineTo(m.x - m.vx * 26, m.y - m.vy * 26);
       ctx.stroke();
-
-      ctx.fillStyle = "rgba(255, 252, 240," + fade + ")";
+      ctx.fillStyle = "rgba(255,252,240," + fade + ")";
       ctx.beginPath();
       ctx.arc(m.x, m.y, 1.6, 0, Math.PI * 2);
       ctx.fill();
@@ -959,24 +1004,187 @@ body {
     if (!last) last = t;
     var dt = Math.min(50, t - last);
     last = t;
-
-    drawSky(t);
-
-    if (!reduced) {
-      if (t > nextMeteor) spawnMeteor(t);
-      drawMeteors(t, dt);
-      requestAnimationFrame(frame);
-    }
+    drawSky(t, dt);
+    if (t > nextMeteor) spawnMeteor(t);
+    drawMeteors(t, dt);
+    requestAnimationFrame(frame);
   }
 
   window.addEventListener("resize", resize);
   resize();
 
   if (reduced) {
-    drawSky(0); // one static painting
+    drawSky(0, 0); // one static painting
   } else {
     requestAnimationFrame(frame);
   }
+})();
+
+</script>
+<script>
+/* ============================================================
+   The Midnight Library — sound
+   Every effect is synthesized live with the Web Audio API,
+   so no audio files are needed and it works offline.
+   ============================================================ */
+var SoundFX = (function () {
+  "use strict";
+
+  var ctx = null;
+  var master = null;
+  var pad = null;
+  var enabled = true;
+
+  try {
+    enabled = localStorage.getItem("ml-sound") !== "off";
+  } catch (e) { /* private mode */ }
+
+  function ac() {
+    if (!enabled) return null;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    if (!ctx) {
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = 0.55;
+      master.connect(ctx.destination);
+    }
+    if (ctx.state === "suspended") ctx.resume();
+    return ctx;
+  }
+
+  function envelope(g, t0, peak, attack, decay) {
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(Math.max(peak, 0.0002), t0 + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + attack + decay);
+  }
+
+  /* a soft bell note with a long tail */
+  function tone(c, freq, t0, dur, peak, type) {
+    var o = c.createOscillator();
+    var g = c.createGain();
+    o.type = type || "sine";
+    o.frequency.setValueAtTime(freq, t0);
+    envelope(g, t0, peak, 0.015, dur);
+    o.connect(g); g.connect(master);
+    o.start(t0); o.stop(t0 + dur + 0.1);
+  }
+
+  /* filtered noise — wind, paper, air */
+  function noise(c, t0, dur, f0, f1, peak, type) {
+    var len = Math.max(1, Math.floor(c.sampleRate * dur));
+    var buf = c.createBuffer(1, len, c.sampleRate);
+    var data = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+    var src = c.createBufferSource();
+    src.buffer = buf;
+    var flt = c.createBiquadFilter();
+    flt.type = type || "lowpass";
+    flt.frequency.setValueAtTime(f0, t0);
+    flt.frequency.exponentialRampToValueAtTime(Math.max(40, f1), t0 + dur);
+    flt.Q.value = 0.8;
+    var g = c.createGain();
+    envelope(g, t0, peak, 0.03, dur);
+    src.connect(flt); flt.connect(g); g.connect(master);
+    src.start(t0); src.stop(t0 + dur + 0.05);
+  }
+
+  /* low ambient pad that sits underneath everything */
+  function startPad() {
+    var c = ac(); if (!c || pad) return;
+    var g = c.createGain();
+    g.gain.value = 0.014;
+    var lfo = c.createOscillator();
+    lfo.frequency.value = 0.09;
+    var lfoGain = c.createGain();
+    lfoGain.gain.value = 0.006;
+    lfo.connect(lfoGain); lfoGain.connect(g.gain);
+    var o1 = c.createOscillator(); o1.type = "sine"; o1.frequency.value = 110;      // A2
+    var o2 = c.createOscillator(); o2.type = "sine"; o2.frequency.value = 164.81;  // E3
+    var o3 = c.createOscillator(); o3.type = "triangle"; o3.frequency.value = 220;  // A3
+    var g3 = c.createGain(); g3.gain.value = 0.25;
+    o1.connect(g); o2.connect(g); o3.connect(g3); g3.connect(g);
+    g.connect(master);
+    o1.start(); o2.start(); o3.start(); lfo.start();
+    pad = { gain: g, oscs: [o1, o2, o3, lfo] };
+  }
+
+  function stopPad() {
+    if (!pad) return;
+    var p = pad; pad = null;
+    try {
+      p.gain.gain.setTargetAtTime(0.0001, ctx.currentTime, 0.2);
+      setTimeout(function () { p.oscs.forEach(function (o) { try { o.stop(); } catch (e) {} }); }, 900);
+    } catch (e) {}
+  }
+
+  return {
+    get enabled() { return enabled; },
+
+    /* the window swings open: breath of wind + distant bells */
+    open: function () {
+      var c = ac(); if (!c) return;
+      var t = c.currentTime;
+      noise(c, t, 1.1, 3200, 380, 0.22);
+      noise(c, t + 0.08, 0.9, 900, 2400, 0.06, "bandpass");
+      var notes = [440, 523.25, 659.25, 880];
+      for (var i = 0; i < notes.length; i++) {
+        tone(c, notes[i], t + 0.22 + i * 0.14, 1.4, 0.075);
+      }
+      startPad();
+    },
+
+    /* turning a page: soft paper whisper + faint tap */
+    page: function () {
+      var c = ac(); if (!c) return;
+      var t = c.currentTime;
+      noise(c, t, 0.22, 1400, 2600, 0.14, "bandpass");
+      tone(c, 196, t, 0.18, 0.05, "triangle");
+    },
+
+    /* a volume lifted from the shelf */
+    book: function () {
+      var c = ac(); if (!c) return;
+      var t = c.currentTime;
+      tone(c, 96, t, 0.4, 0.16, "sine");
+      tone(c, 144, t + 0.02, 0.28, 0.06, "triangle");
+      noise(c, t, 0.16, 700, 1600, 0.08, "bandpass");
+    },
+
+    /* closing something gently */
+    close: function () {
+      var c = ac(); if (!c) return;
+      var t = c.currentTime;
+      noise(c, t, 0.3, 2200, 500, 0.1);
+      tone(c, 160, t, 0.22, 0.05, "triangle");
+    },
+
+    /* the epilogue: a small constellation of ascending bells */
+    shimmer: function () {
+      var c = ac(); if (!c) return;
+      var t = c.currentTime;
+      var notes = [523.25, 587.33, 783.99, 1046.5, 1318.5];
+      for (var i = 0; i < notes.length; i++) {
+        tone(c, notes[i], t + i * 0.16, 1.8, 0.06);
+        tone(c, notes[i] / 2, t + i * 0.16, 2.0, 0.03);
+      }
+      noise(c, t, 1.6, 5000, 8000, 0.02, "highpass");
+    },
+
+    /* tiny UI tick */
+    click: function () {
+      var c = ac(); if (!c) return;
+      tone(c, 660, c.currentTime, 0.08, 0.04, "triangle");
+    },
+
+    toggle: function () {
+      enabled = !enabled;
+      try { localStorage.setItem("ml-sound", enabled ? "on" : "off"); } catch (e) {}
+      if (enabled) { if (ctx && ctx.state === "suspended") ctx.resume(); startPad(); }
+      else stopPad();
+      return enabled;
+    }
+  };
 })();
 
 </script>
@@ -1462,12 +1670,43 @@ if (typeof module !== "undefined" && module.exports) {
 
   function initWindow() {
     var win = $("#window-door");
+    var scene = win.closest(".scene");
+    var hint = $("#window-hint");
+
     win.addEventListener("click", function () {
       if (win.classList.contains("open")) return;
       win.classList.add("open");
       win.setAttribute("aria-expanded", "true");
-      setTimeout(function () { show("screen-form"); }, 1250);
+      scene.classList.add("open");
+      hint.classList.add("gone");
+      scene.querySelector(".floor-light").classList.add("on");
+      if (window.SoundFX) SoundFX.open();
+      setTimeout(function () { show("screen-form"); }, 1500);
     });
+
+    /* gentle Blender-style parallax tilt on the window */
+    var finePointer = window.matchMedia && window.matchMedia("(pointer: fine)").matches;
+    var reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var tilt = win.querySelector(".window-tilt");
+
+    if (finePointer && !reducedMotion) {
+      var raf = null;
+      scene.addEventListener("mousemove", function (e) {
+        var rect = scene.getBoundingClientRect();
+        var px = (e.clientX - rect.left) / rect.width - 0.5;
+        var py = (e.clientY - rect.top) / rect.height - 0.5;
+        if (raf) return;
+        raf = requestAnimationFrame(function () {
+          tilt.style.setProperty("--ry", (px * 7).toFixed(2) + "deg");
+          tilt.style.setProperty("--rx", (-py * 6).toFixed(2) + "deg");
+          raf = null;
+        });
+      });
+      scene.addEventListener("mouseleave", function () {
+        tilt.style.setProperty("--rx", "0deg");
+        tilt.style.setProperty("--ry", "0deg");
+      });
+    }
   }
 
   /* -------------------------- form --------------------------- */
@@ -1517,7 +1756,10 @@ if (typeof module !== "undefined" && module.exports) {
         '<span class="vol">Volume ' + life.volume + "</span>" +
         '<span class="btitle">' + esc(life.title) + "</span>" +
         '<span class="brole">' + esc(life.tagline) + "</span>";
-      book.addEventListener("click", function () { openReader(i); });
+      book.addEventListener("click", function () {
+        if (window.SoundFX) SoundFX.book();
+        openReader(i);
+      });
       shelf.appendChild(book);
     });
   }
@@ -1565,7 +1807,7 @@ if (typeof module !== "undefined" && module.exports) {
         '<div class="p-body"><p>' + esc(life.chapters[state.page - 1]) + "</p></div>";
     }
 
-    pageEl.innerHTML = html;
+    pageEl.innerHTML = '<div class="p-scroll">' + html + "</div>";
     pageEl.classList.remove("swap");
     void pageEl.offsetWidth;
     pageEl.classList.add("swap");
@@ -1586,8 +1828,13 @@ if (typeof module !== "undefined" && module.exports) {
     var total = totalPages(life);
     var next = state.page + d;
     if (next < 0) return;
-    if (next >= total) { closeReader(); return; }
+    if (next >= total) {
+      if (window.SoundFX) SoundFX.close();
+      closeReader();
+      return;
+    }
     state.page = next;
+    if (window.SoundFX) SoundFX.page();
     renderPage();
   }
 
@@ -1604,6 +1851,7 @@ if (typeof module !== "undefined" && module.exports) {
     });
 
     $("#btn-own-life").addEventListener("click", function () {
+      if (window.SoundFX) SoundFX.click();
       renderEpilogue();
       show("screen-epilogue");
     });
@@ -1622,6 +1870,7 @@ if (typeof module !== "undefined" && module.exports) {
       box.appendChild(el);
     });
     requestAnimationFrame(function () { drawConstellation(); });
+    if (window.SoundFX) SoundFX.shimmer();
   }
 
   function drawConstellation() {
@@ -1735,6 +1984,17 @@ if (typeof module !== "undefined" && module.exports) {
   }
 
   function initActions() {
+    /* sound toggle reflects the saved preference */
+    var toggle = $("#sound-toggle");
+    var pressed = !!(window.SoundFX && SoundFX.enabled);
+    toggle.setAttribute("aria-pressed", String(pressed));
+    toggle.addEventListener("click", function () {
+      if (!window.SoundFX) return;
+      var on = SoundFX.toggle();
+      toggle.setAttribute("aria-pressed", String(on));
+      if (on) SoundFX.click();
+    });
+
     $("#btn-download").addEventListener("click", function () {
       downloadText("the-midnight-library-journal.txt", journalText(null));
     });

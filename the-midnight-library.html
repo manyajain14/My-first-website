@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Midnight Library — An Aspirational Journal</title>
+<meta name="description" content="A fan-made interactive journal inspired by Matt Haig's The Midnight Library. Open the window, borrow a life, and return to your own.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<style>
+/* ============================================================
+   The Midnight Library — an aspirational journal
+   Navy night · white serif · a window full of other lives
+   ============================================================ */
+
+:root {
+  --navy-0: #050a1c;
+  --navy-1: #0a1430;
+  --navy-2: #101d42;
+  --ink: #eef2ff;
+  --ink-dim: rgba(238, 242, 255, 0.72);
+  --gold: #e6c584;
+  --gold-soft: rgba(230, 197, 132, 0.45);
+  --serif: "Times New Roman", Times, serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scrollbar-color: var(--navy-2) var(--navy-0); }
+
+body {
+  font-family: var(--serif);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 800px at 70% -10%, #14224d 0%, transparent 60%),
+    radial-gradient(900px 700px at 15% 110%, #101c44 0%, transparent 55%),
+    linear-gradient(180deg, var(--navy-0), var(--navy-1) 55%, #060b20);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+::selection { background: rgba(230, 197, 132, 0.35); color: #fff; }
+
+#starfield {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+}
+
+.vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 52%, rgba(2, 5, 15, 0.78) 100%);
+}
+
+/* ---------------- screens ---------------- */
+
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(1.2rem, 4vw, 3rem);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px);
+  pointer-events: none;
+  transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0.7s;
+}
+
+.screen.active {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  pointer-events: auto;
+  transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s;
+}
+
+.overline {
+  font-variant: small-caps;
+  letter-spacing: 0.38em;
+  font-size: clamp(0.72rem, 1.6vw, 0.9rem);
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(230, 197, 132, 0.35);
+  margin-bottom: 1rem;
+}
+
+.screen-title {
+  font-size: clamp(1.7rem, 5vw, 2.8rem);
+  font-weight: normal;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  margin-bottom: 0.9rem;
+}
+
+.lede {
+  color: var(--ink-dim);
+  font-style: italic;
+  font-size: clamp(1rem, 2.2vw, 1.15rem);
+  max-width: 46ch;
+  margin-bottom: 1.8rem;
+  line-height: 1.6;
+}
+
+/* ---------------- landing ---------------- */
+
+#screen-landing { gap: 0.55rem; }
+
+.site-title {
+  font-size: clamp(2.6rem, 8vw, 5.2rem);
+  font-weight: normal;
+  letter-spacing: 0.1em;
+  line-height: 1.05;
+  text-shadow:
+    0 0 34px rgba(150, 175, 255, 0.45),
+    0 0 90px rgba(120, 150, 255, 0.25);
+}
+
+.site-sub {
+  color: var(--ink-dim);
+  font-style: italic;
+  font-size: clamp(1rem, 2.4vw, 1.25rem);
+  margin-bottom: 1.6rem;
+}
+
+/* ------- the little window ------- */
+
+.window {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.5rem;
+  margin: 0.4rem 0 0.6rem;
+}
+
+.window-frame {
+  display: block;
+  width: min(46vmin, 320px);
+  aspect-ratio: 3 / 4;
+  border-radius: 16px;
+  padding: 12px;
+  background: conic-gradient(from 210deg,
+    #67e8f9, #a78bfa, #f0abfc, #fda4af, #fcd34d, #6ee7b7, #67e8f9);
+  box-shadow:
+    0 0 44px rgba(140, 160, 255, 0.28),
+    0 0 120px rgba(120, 140, 255, 0.14),
+    inset 0 0 16px rgba(255, 255, 255, 0.35);
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.6s ease;
+  position: relative;
+}
+
+.window:hover .window-frame,
+.window:focus-visible .window-frame {
+  transform: scale(1.04);
+  box-shadow:
+    0 0 60px rgba(160, 180, 255, 0.4),
+    0 0 160px rgba(130, 150, 255, 0.22),
+    inset 0 0 18px rgba(255, 255, 255, 0.45);
+}
+
+.window:focus-visible { outline: 2px dashed var(--gold); outline-offset: 8px; border-radius: 18px; }
+
+.window-inner {
+  position: absolute;
+  inset: 12px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 30%, #26398c 0%, #0d1838 55%, #080f26 100%);
+}
+
+.glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 62%,
+    rgba(255, 244, 214, 0.95) 0%,
+    rgba(255, 214, 140, 0.5) 28%,
+    rgba(255, 200, 120, 0.12) 48%,
+    transparent 65%);
+  opacity: 0.85;
+  transform: scale(0.94);
+  transition: opacity 1s ease, transform 1.4s ease;
+}
+
+.glass {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(1.5px 1.5px at 18% 22%, rgba(255, 255, 255, 0.95), transparent 60%),
+    radial-gradient(1px 1px at 42% 12%, rgba(255, 240, 200, 0.9), transparent 60%),
+    radial-gradient(1.2px 1.2px at 66% 26%, rgba(255, 255, 255, 0.85), transparent 60%),
+    radial-gradient(1px 1px at 82% 16%, rgba(200, 220, 255, 0.9), transparent 60%),
+    radial-gradient(1.4px 1.4px at 55% 45%, rgba(255, 255, 255, 0.8), transparent 60%),
+    radial-gradient(1px 1px at 30% 55%, rgba(255, 220, 230, 0.85), transparent 60%),
+    radial-gradient(1.2px 1.2px at 74% 60%, rgba(255, 255, 255, 0.9), transparent 60%),
+    radial-gradient(1px 1px at 12% 70%, rgba(190, 220, 255, 0.8), transparent 60%),
+    radial-gradient(circle at 50% 62%, rgba(255, 238, 200, 0.28), transparent 55%);
+}
+
+.pane {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50.5%;
+  background: linear-gradient(160deg,
+    rgba(170, 205, 255, 0.22) 0%,
+    rgba(30, 48, 96, 0.5) 45%,
+    rgba(12, 22, 52, 0.72) 100%);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: transform 1.15s cubic-bezier(0.72, 0, 0.18, 1);
+}
+
+.pane-left  { left: 0;  border-radius: 8px 3px 3px 8px; }
+.pane-right { right: 0; border-radius: 3px 8px 8px 3px; }
+
+.mullion {
+  position: absolute;
+  background: linear-gradient(180deg, rgba(230, 197, 132, 0.75), rgba(150, 130, 90, 0.6));
+  transition: opacity 0.6s ease;
+}
+
+.mullion-v { left: calc(50% - 1px); top: 4%; bottom: 4%; width: 2px; }
+.mullion-h { top: calc(50% - 1px); left: 4%; right: 4%; height: 2px; }
+
+.window.open { cursor: default; }
+.window.open .pane-left  { transform: translateX(-104%); }
+.window.open .pane-right { transform: translateX(104%); }
+.window.open .glow     { opacity: 1; transform: scale(1.35); }
+.window.open .mullion  { opacity: 0; }
+.window.open .hint     { opacity: 0; transform: translateY(6px); }
+
+.hint {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--ink-dim);
+  letter-spacing: 0.08em;
+  animation: breathe 3.2s ease-in-out infinite;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+.welcome-back {
+  font-style: italic;
+  color: var(--gold);
+  font-size: 0.98rem;
+  letter-spacing: 0.04em;
+}
+
+.landing-foot { margin-top: 2.2rem; }
+
+.teaser {
+  font-style: italic;
+  color: var(--ink-dim);
+  letter-spacing: 0.03em;
+}
+
+.credit {
+  margin-top: 0.7rem;
+  font-size: 0.8rem;
+  color: rgba(238, 242, 255, 0.42);
+}
+
+/* ---------------- buttons ---------------- */
+
+.btn {
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: transparent;
+  border: 1px solid var(--gold-soft);
+  border-radius: 999px;
+  padding: 0.9rem 1.9rem;
+  cursor: pointer;
+  transition: background 0.35s ease, box-shadow 0.35s ease, color 0.35s ease, transform 0.25s ease;
+}
+
+.btn:hover {
+  background: rgba(230, 197, 132, 0.12);
+  box-shadow: 0 0 26px rgba(230, 197, 132, 0.28);
+  color: #fff8e7;
+  transform: translateY(-1px);
+}
+
+.btn:active { transform: translateY(0); }
+
+.btn:focus-visible { outline: 2px dashed var(--gold); outline-offset: 4px; }
+
+.btn-ghost { border-color: rgba(238, 242, 255, 0.25); color: var(--ink-dim); }
+.btn-ghost:hover { color: var(--ink); box-shadow: 0 0 20px rgba(238, 242, 255, 0.15); }
+
+.btn-small { padding: 0.55rem 1.1rem; font-size: 0.72rem; }
+
+/* ---------------- form ---------------- */
+
+.form-wrap { display: flex; flex-direction: column; align-items: center; max-width: 660px; width: 100%; }
+
+.card {
+  width: 100%;
+  text-align: left;
+  background: linear-gradient(180deg, rgba(16, 29, 66, 0.82), rgba(9, 16, 38, 0.88));
+  border: 1px solid rgba(230, 197, 132, 0.28);
+  border-radius: 18px;
+  padding: clamp(1.5rem, 4vw, 2.6rem);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.55),
+    inset 0 0 40px rgba(20, 34, 80, 0.4);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  gap: 1.3rem;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.field { display: flex; flex-direction: column; gap: 0.45rem; }
+
+.field label {
+  font-variant: small-caps;
+  letter-spacing: 0.24em;
+  font-size: 0.82rem;
+  color: var(--gold);
+}
+
+.field input,
+.field textarea {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+  color: var(--ink);
+  background: rgba(5, 10, 28, 0.55);
+  border: none;
+  border-bottom: 1px solid rgba(238, 242, 255, 0.28);
+  border-radius: 6px 6px 0 0;
+  padding: 0.65rem 0.7rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+
+.field textarea { resize: vertical; line-height: 1.55; }
+
+.field input::placeholder,
+.field textarea::placeholder { color: rgba(238, 242, 255, 0.34); font-style: italic; }
+
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-bottom-color: var(--gold);
+  background: rgba(5, 10, 28, 0.8);
+  box-shadow: 0 1px 0 var(--gold), 0 8px 24px -12px rgba(230, 197, 132, 0.35);
+}
+
+.card .btn-primary { align-self: center; margin-top: 0.4rem; }
+
+.fineprint {
+  text-align: center;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: rgba(238, 242, 255, 0.4);
+  letter-spacing: 0.03em;
+}
+
+/* ---------------- shelf ---------------- */
+
+.lib-wrap { display: flex; flex-direction: column; align-items: center; max-width:960px; width: 100%; }
+
+.shelf {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(1rem, 3vw, 2rem);
+  margin: 1.2rem 0 2rem;
+  perspective: 900px;
+}
+
+.book {
+  --c1: #3730a3;
+  --c2: #7c3aed;
+  width: 200px;
+  height: 296px;
+  border: none;
+  border-radius: 6px 10px 10px 6px;
+  background: linear-gradient(150deg, var(--c1) 0%, var(--c2) 100%);
+  box-shadow:
+    -8px 10px 26px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.14),
+    inset -10px 0 18px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  font-family: var(--serif);
+  color: #fdfbf5;
+  position: relative;
+  text-align: center;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+}
+
+.book::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.35);
+  box-shadow: 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.book::after {
+  content: "\2726";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.book:hover,
+.book:focus-visible {
+  transform: translateY(-14px) rotate(-1.4deg);
+  box-shadow:
+    -8px 14px 30px rgba(0, 0, 0, 0.55),
+    0 22px 46px -14px var(--c1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22);
+}
+
+.book:focus-visible { outline: 2px dashed var(--gold); outline-offset: 5px; }
+
+.book .vol {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  right: 0;
+  font-size: 0.62rem;
+  letter-spacing: 0.3em;
+  color: rgba(255, 235, 190, 0.9);
+  text-transform: uppercase;
+}
+
+.book .btitle {
+  position: absolute;
+  top: 48px;
+  bottom: 44px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  writing-mode: vertical-rl;
+  font-size: 1.05rem;
+  letter-spacing: 0.05em;
+  line-height: 1.25;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.book .brole {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
+  font-style: italic;
+  font-size: 0.76rem;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.lib-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-bottom: 1.2rem;
+}
+
+/* ---------------- reader ---------------- */
+
+.reader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(4, 8, 22, 0.88);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: clamp(0.8rem, 3vw, 2rem);
+  overflow-y: auto;
+}
+
+.reader[hidden] { display: none; }
+
+.reader-top {
+  width: min(680px, 94vw);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.reader-crumb {
+  font-variant: small-caps;
+  letter-spacing: 0.3em;
+  font-size: 0.8rem;
+  color: var(--gold);
+}
+
+.reader-close {
+  background: none;
+  border: 1px solid rgba(238, 242, 255, 0.25);
+  color: var(--ink-dim);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.reader-close:hover { color: #fff; border-color: var(--gold); box-shadow: 0 0 16px rgba(230, 197, 132, 0.3); }
+
+.page {
+  width: min(680px, 94vw);
+  max-height: 64vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #0e1a3d 0%, #081130 100%);
+  border: 1px solid rgba(230, 197, 132, 0.3);
+  border-radius: 14px;
+  padding: clamp(1.6rem, 4.5vw, 3.2rem);
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.65), inset 0 0 60px rgba(16, 29, 66, 0.5);
+  text-align: left;
+}
+
+.page.swap { animation: pageIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+@keyframes pageIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.page .p-vol {
+  font-variant: small-caps;
+  letter-spacing: 0.32em;
+  font-size: 0.75rem;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 1.1rem;
+}
+
+.page h3 {
+  font-weight: normal;
+  font-size: clamp(1.35rem, 3.4vw, 1.9rem);
+  letter-spacing: 0.03em;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.page .p-role {
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-dim);
+  margin-top: 0.5rem;
+}
+
+.page .rule {
+  border: none;
+  height: 1px;
+  margin: 1.4rem auto;
+  width: 55%;
+  background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
+}
+
+.page .chapter-label {
+  font-variant: small-caps;
+  letter-spacing: 0.3em;
+  font-size: 0.8rem;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 1.2rem;
+}
+
+.page .p-body p {
+  line-height: 1.9;
+  margin: 1.05em 0;
+  color: #e8ecff;
+  font-size: 1.05rem;
+  text-indent: 1.5em;
+}
+
+.page .p-body p:first-child { text-indent: 0; }
+
+.page .p-body p:first-of-type::first-letter {
+  font-size: 3.1em;
+  float: left;
+  line-height: 0.82;
+  padding: 0.06em 0.14em 0 0;
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(230, 197, 132, 0.4);
+}
+
+.cover-ornament {
+  text-align: center;
+  color: var(--gold);
+  font-size: 1.3rem;
+  letter-spacing: 0.6em;
+  margin: 1.1rem 0;
+}
+
+.belongs {
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-dim);
+  margin-top: 1.6rem;
+  line-height: 1.7;
+}
+
+.belongs strong { color: var(--ink); font-weight: normal; }
+
+.dl-link {
+  display: block;
+  margin: 1.6rem auto 0;
+  background: none;
+  border: none;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.88rem;
+  color: var(--gold);
+  cursor: pointer;
+  border-bottom: 1px dotted var(--gold-soft);
+  padding-bottom: 2px;
+}
+
+.dl-link:hover { color: #fff8e7; }
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: min(680px, 94vw);
+  gap: 1rem;
+}
+
+.pg-count {
+  font-variant: small-caps;
+  letter-spacing: 0.26em;
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+}
+
+/* ---------------- epilogue ---------------- */
+
+.epi-wrap { display: flex; flex-direction: column; align-items: center; max-width: 720px; width: 100%; }
+
+#constellation {
+  width: min(620px, 88vw);
+  height: 120px;
+  margin: 0.4rem 0 1.2rem;
+}
+
+.epi-text {
+  max-width: 58ch;
+  font-size: clamp(1.02rem, 2.2vw, 1.18rem);
+  line-height: 1.95;
+  color: #e8ecff;
+}
+
+.epi-text p { margin: 1em 0; }
+
+.epi-text p:last-child {
+  font-variant: small-caps;
+  letter-spacing: 0.28em;
+  color: var(--gold);
+  font-size: 1.05rem;
+}
+
+.noscript {
+  position: fixed;
+  inset: auto 0 0 0;
+  background: #1a0505;
+  color: #ffd9d9;
+  text-align: center;
+  padding: 1rem;
+  z-index: 99;
+  font-family: var(--serif);
+}
+
+/* ---------------- responsive & motion ---------------- */
+
+@media (max-width: 560px) {
+  .field-grid { grid-template-columns: 1fr; }
+  .book { width: 168px; height: 250px; }
+  .book .btitle { top: 44px; bottom: 42px; font-size: 0.95rem; }
+  .book .brole { font-size: 0.7rem; }
+  .page { max-height: 68vh; }
+  .pager { flex-wrap: wrap; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- ================= LANDING ================= -->
+<main id="screen-landing" class="screen active" aria-label="Welcome">
+  <p class="overline">Between life and death there is a library</p>
+  <h1 class="site-title">The Midnight<br>Library</h1>
+  <p class="site-sub">An aspirational journal for the lives we almost lived.</p>
+
+  <button id="window-door" class="window" aria-label="Open the window into the library" aria-expanded="false">
+    <span class="window-frame">
+      <span class="window-inner">
+        <span class="glow"></span>
+        <span class="glass"></span>
+        <span class="pane pane-left"></span>
+        <span class="pane pane-right"></span>
+        <span class="mullion mullion-v"></span>
+        <span class="mullion mullion-h"></span>
+      </span>
+    </span>
+    <span class="hint">Click the window to open it</span>
+  </button>
+
+  <p id="welcome-back" class="welcome-back" hidden></p>
+
+  <footer class="landing-foot">
+    <p class="teaser">Some lives must be borrowed before the one you have is seen.</p>
+    <p class="credit">A fan-made tribute, inspired by Matt Haig&rsquo;s <em>The Midnight Library</em>.</p>
+  </footer>
+</main>
+
+<!-- ================= DETAILS FORM ================= -->
+<section id="screen-form" class="screen" aria-label="Your details">
+  <div class="form-wrap">
+    <p class="overline">Step through</p>
+    <h2 class="screen-title">Tell the library who you are</h2>
+    <p class="lede">Before the doors can open, the librarian asks for three small truths.</p>
+
+    <form id="library-form" class="card" autocomplete="off">
+      <div class="field-grid">
+        <div class="field">
+          <label for="f-name">Your name</label>
+          <input id="f-name" name="name" type="text" maxlength="40" placeholder="Whoever you are tonight" required>
+        </div>
+        <div class="field">
+          <label for="f-age">Your age</label>
+          <input id="f-age" name="age" type="number" min="8" max="120" step="1" placeholder="25" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-wish">Whose life do you wish to borrow?</label>
+        <textarea id="f-wish" name="wish" rows="3" maxlength="240"
+          placeholder="a K-pop idol · a doctor who cleared NEET · a version of me who never gave up"
+          required></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Open the Library</button>
+      <p class="fineprint">Your words never leave this page — the library is polite like that.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ================= SHELF OF LIVES ================= -->
+<section id="screen-library" class="screen" aria-label="The shelf of borrowed lives">
+  <div class="lib-wrap">
+    <p class="overline">The library of lives</p>
+    <h2 class="screen-title" id="library-title">Welcome, traveler.</h2>
+    <p class="lede" id="library-lede">Three volumes have been pulled for you. Borrow one — or return to your own life.</p>
+
+    <div id="shelf" class="shelf"></div>
+
+    <div class="lib-actions">
+      <button id="btn-own-life" class="btn">Return to your own life</button>
+      <button id="btn-edit" class="btn btn-ghost">Change your details</button>
+    </div>
+    <p class="fineprint">The library keeps the light on. Volumes renew themselves forever.</p>
+  </div>
+</section>
+
+<!-- ================= READER ================= -->
+<div id="reader" class="reader" hidden role="dialog" aria-modal="true" aria-label="A borrowed life">
+  <div class="reader-top">
+    <span id="reader-crumb" class="reader-crumb">Volume I</span>
+    <button id="reader-close" class="reader-close" aria-label="Close the book">&#10005;</button>
+  </div>
+  <article id="page" class="page"></article>
+  <div class="pager">
+    <button id="pg-prev" class="btn btn-small btn-ghost">&larr; Back</button>
+    <span id="pg-count" class="pg-count">Page I of V</span>
+    <button id="pg-next" class="btn btn-small">Next &rarr;</button>
+  </div>
+</div>
+
+<!-- ================= EPILOGUE ================= -->
+<section id="screen-epilogue" class="screen" aria-label="Epilogue">
+  <div class="epi-wrap">
+    <p class="overline">Epilogue</p>
+    <h2 class="screen-title">The Most Perfect Role</h2>
+    <canvas id="constellation" aria-hidden="true"></canvas>
+    <div id="epi-text" class="epi-text"></div>
+    <div class="lib-actions">
+      <button id="btn-download" class="btn">&#10022; Save the epilogue</button>
+      <button id="btn-again" class="btn btn-ghost">Begin again</button>
+    </div>
+  </div>
+</section>
+
+<noscript><p class="noscript">The library needs JavaScript to open its doors.</p></noscript>
+
+<script>
+/* The Midnight Library — night sky
+   A field of slowly twinkling stars with the occasional shooting star. */
+(function () {
+  "use strict";
+
+  var canvas = document.getElementById("starfield");
+  if (!canvas || !canvas.getContext) return;
+
+  var ctx = canvas.getContext("2d");
+  if (!ctx) return; // canvas unsupported (e.g. very old browsers) — night sky stays plain navy
+  var reduced = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+  var W = 0, H = 0;
+  var stars = [];
+  var meteors = [];
+  var nextMeteor = 3500; // ms until first meteor
+  var last = 0;
+
+  var PALETTE = [
+    [255, 255, 255],   // white
+    [214, 228, 255],   // ice blue
+    [255, 230, 168],   // warm gold
+    [255, 214, 224]    // faint rose
+  ];
+
+  function resize() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.floor(W * dpr);
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width = W + "px";
+    canvas.style.height = H + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    seed();
+  }
+
+  function seed() {
+    var count = Math.max(90, Math.min(260, Math.round((W * H) / 8500)));
+    stars = [];
+    for (var i = 0; i < count; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: 0.3 + Math.random() * 1.35,
+        base: 0.3 + Math.random() * 0.65,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.4 + Math.random() * 1.1,
+        c: PALETTE[Math.floor(Math.random() * PALETTE.length)]
+      });
+    }
+  }
+
+  function drawSky(t) {
+    ctx.clearRect(0, 0, W, H);
+
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      var tw = s.base * (0.55 + 0.45 * Math.sin(t * 0.001 * s.speed + s.phase));
+      ctx.globalAlpha = tw;
+      ctx.fillStyle = "rgb(" + s.c[0] + "," + s.c[1] + "," + s.c[2] + ")";
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function spawnMeteor(t) {
+    var sx = W * (0.25 + Math.random() * 0.7);
+    var sy = Math.random() * H * 0.35;
+    var speed = 5 + Math.random() * 4;                 // px per ~16ms step
+    var angle = Math.PI * (0.12 + Math.random() * 0.1); // shallow downward slope
+    meteors.push({
+      x: sx, y: sy,
+      vx: -Math.cos(angle) * speed,                    // drift left…
+      vy: Math.sin(angle) * speed,                     // …and gently down
+      born: t,
+      life: 900 + Math.random() * 500
+    });
+    nextMeteor = t + 5000 + Math.random() * 7000;
+  }
+
+  function drawMeteors(t, dt) {
+    for (var i = meteors.length - 1; i >= 0; i--) {
+      var m = meteors[i];
+      var age = t - m.born;
+      if (age > m.life || m.x < -80 || m.y > H + 80) {
+        meteors.splice(i, 1);
+        continue;
+      }
+      m.x += m.vx * dt * 0.06;
+      m.y += m.vy * dt * 0.06;
+
+      var fade = 1 - age / m.life;
+      var tailX = m.x - m.vx * 26;
+      var tailY = m.y - m.vy * 26;
+
+      var grad = ctx.createLinearGradient(m.x, m.y, tailX, tailY);
+      grad.addColorStop(0, "rgba(255, 246, 220," + (0.9 * fade) + ")");
+      grad.addColorStop(1, "rgba(255, 246, 220, 0)");
+
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.6;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(m.x, m.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(255, 252, 240," + fade + ")";
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function frame(t) {
+    if (!last) last = t;
+    var dt = Math.min(50, t - last);
+    last = t;
+
+    drawSky(t);
+
+    if (!reduced) {
+      if (t > nextMeteor) spawnMeteor(t);
+      drawMeteors(t, dt);
+      requestAnimationFrame(frame);
+    }
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  if (reduced) {
+    drawSky(0); // one static painting
+  } else {
+    requestAnimationFrame(frame);
+  }
+})();
+
+</script>
+<script>
+/* ============================================================
+   The Midnight Library — the life engine
+   Matches whatever you wished to be with a borrowed life,
+   then writes it as a small journal: four chapters + a whisper.
+   Plain data + functions; no DOM here, so it also runs in Node.
+   ============================================================ */
+var LivesEngine = (function () {
+  "use strict";
+
+  var CHAPTER_HEADINGS = [
+    "Chapter I — The Door Opens",
+    "Chapter II — The Life Itself",
+    "Chapter III — The Small Cracks",
+    "What the Library Whispered"
+  ];
+
+  var ROMAN_VOLUMES = ["I", "II", "III"];
+
+  /* ----------------------------------------------------------
+     Each archetype: keywords matched against your wish,
+     neighbouring shelves to browse when this one is taken,
+     and four chapters written around {name}, {age} and {wish}.
+     ---------------------------------------------------------- */
+  var ARCHETYPES = [
+    {
+      id: "idol",
+      role: "a pop idol with your face on every billboard",
+      title: "The Spotlight Life",
+      tagline: "Twenty thousand lightsticks, humming your name.",
+      colors: ["#7c3aed", "#db2777"],
+      keywords: ["k-pop", "kpop", "k pop", "pop idol", "idol", "singer", "sing", "musician", "rockstar", "rock star", "band", "songwriter", "rapper", "dancer-singer"],
+      neighbors: ["creator", "actor", "dancer"],
+      chapters: [
+        function (c) { return "The practice room smells of cold coffee and floor polish. Somewhere above you, twenty thousand lightsticks are already humming, and the choreographer is counting you in — five, six, seven, eight. In this life, " + c.name + ", your voice is the song strangers cry to at two in the morning. Tonight, for the first time, you let yourself hear it."; },
+        function (c) { return "Debut comes like weather — sudden, enormous, beyond appeal. Music shows, fan signs, a face on a billboard you once walked beneath on your way to somewhere ordinary. At " + c.age + ", in the other ledger of your life, you hummed in the shower and told no one. Here, the whole country knows the bridge by heart, and teenagers ink your name into notebook margins. There is a version of fame that feels like being hugged by an entire city."; },
+        function (c) { return "But the schedule is a contract written in sleeplessness. Four hours of sleep, then cameras; a song you wrote shelved for one focus groups liked more; your mother aging on a phone screen. The comment section knows your waistline, your dating life, your grief. Some nights the applause stops, and the silence is so loud you can hear the practice room again, asking why you started."; },
+        function (c) { return "Applause is real, and so is the silence after it. The library does not ask you to stop singing. It asks whether you sang because the song was yours — or because the dark needed proof. Bring the answer home with you; it is worth more than any trophy on this shelf."; }
+      ]
+    },
+
+    {
+      id: "doctor",
+      role: "a doctor whose white coat fits like destiny",
+      title: "The White-Coat Life",
+      tagline: "The envelope opened differently here.",
+      colors: ["#0ea5e9", "#10b981"],
+      keywords: ["doctor", "neet", "mbbs", "physician", "surgeon", "medical", "medic", "nurse", "psychiatrist", "dentist", "vet"],
+      neighbors: ["scientist", "teacher", "marine"],
+      chapters: [
+        function (c) { return "The corridor is longer than memory, and it smells of antiseptic and rain. White coat, stethoscope, a name badge spelled correctly on the first try. In this life, the envelope opened differently. In this life, the rank existed — and it was enough."; },
+        function (c) { return "MBBS first: anatomy labs at midnight, the first suture you ever placed — trembling, and perfect. Then the wards: rounds at dawn, charts at midnight, the senior who tosses you the keys to your first solo emergency. At " + c.age + ", in the life you know, you measured your worth in marks out of seven hundred and twenty. Here you are measured in heartbeats returned. The first patient who calls you “doctor” is sixty years old and crying. So are you."; },
+        function (c) { return "Yet the night shifts accumulate like snow. A patient you could not save sits behind your eyes for years. Festivals happen in the cafeteria between codes. And sometimes, washing your hands for the hundredth time, you wonder whose dream this was — yours, or everyone else’s idea of one."; },
+        function (c) { return "A rank is a door, not a verdict. The same hands that held the pen hold everything else you love. The library whispers: heal boldly — and leave the doorway open behind you, so the child who first dreamed this can walk through as herself."; }
+      ]
+    },
+
+    {
+      id: "engineer",
+      role: "an engineer from the institute everyone dreams of",
+      title: "The Rank-List Life",
+      tagline: "The exam went your way the first time.",
+      colors: ["#1d4ed8", "#06b6d4"],
+      keywords: ["engineer", "engineering", "iit", "jee", "nit", "coder", "programmer", "software", "tech", "computer", "developer", "data scientist", "ai"],
+      neighbors: ["scientist", "creator", "pilot"],
+      chapters: [
+        function (c) { return "The hostel room smells of solder, instant noodles and ambition. On the notice board hangs a rank list — and somewhere near the top, your name. In this life, the exam went your way. The letter arrived, and the whole house wept with pride."; },
+        function (c) { return "The campus is banyan trees and all-nighters. You learn to debug at three in the morning, to present to rooms full of people cleverer than you, and to fail a test and survive it. Placement season arrives; the offer letter carries a number that makes your father’s shoulders drop with relief. Years later your code runs quietly in places you will never visit, moving money, medicine and messages — like very good plumbing."; },
+        function (c) { return "But impostor syndrome is a roommate who never moves out. Batchmates seem born knowing things you had to bleed for. Some evenings you scroll the profiles of school friends — the ones who never went to coaching — and wonder whether the rank bought you a ladder or a cage. The question follows you like a shadow: did you choose this, or did it choose you?"; },
+        function (c) { return "The library knows every rank list ends at the same address. Nothing here can rank the patience you show, the problems you untangle for friends at midnight, the way you keep learning when nobody grades you. Doors open by ranks; lives open by character."; }
+      ]
+    },
+
+    {
+      id: "scientist",
+      role: "a scientist chasing one beautiful question",
+      title: "The Whiteboard Life",
+      tagline: "The graph matches the theory on a Tuesday.",
+      colors: ["#4338ca", "#8b5cf6"],
+      keywords: ["scientist", "science", "research", "researcher", "physicist", "chemist", "biologist", "mathematician", "professor", "astrophysics", "quantum", "nasa", "isro"],
+      neighbors: ["doctor", "astronaut", "engineer"],
+      chapters: [
+        function (c) { return "The lab hums at two in the morning, the freezer’s small compressor counting time like a metronome. The whiteboard is dense with symbols only three people on Earth read for pleasure. In this life, " + c.name + ", you are one of them."; },
+        function (c) { return "Grants, journals, conferences in cities you half-sightsee. Then the Tuesday everything turns: the graph matches the theory, the cells do exactly what the model said, and you sit alone in the glow of a result no one else has ever seen. It is a small thing, honest and enormous. Decades of wrong guesses collapse into one clean line. At " + c.age + ", in the other ledger of your life, you had begun to believe curiosity was a luxury. Here it is your salary."; },
+        function (c) { return "But science pays in delayed answers. Papers rejected, experiments that simply refuse, funding that evaporates between fiscal years. Colleagues leave for industries that glitter. Some winters you defend the value of knowing a little more about almost nothing, and your voice shakes while you do it."; },
+        function (c) { return "Curiosity is the one career that never fires you — it only waits. The library asks nothing grand: keep one question alive in your ordinary life, and feed it ten minutes a day. Discovery is a habit long before it is a headline."; }
+      ]
+    },
+
+    {
+      id: "actor",
+      role: "an actor or model the cameras adore",
+      title: "The Flashbulb Life",
+      tagline: "“Again — but sadder.”",
+      colors: ["#be185d", "#f59e0b"],
+      keywords: ["actor", "actress", "model", "film", "bollywood", "hollywood", "cinema", "movie", "movies", "drama", "theatre", "theater", "influencer-model", "star"],
+      neighbors: ["idol", "creator", "artist"],
+      chapters: [
+        function (c) { return "The casting director looks over the top of her glasses. “Again,” she says, “but sadder.” In this life, " + c.name + ", the camera loves you the way weather loves a field — completely, and for a season."; },
+        function (c) { return "Auditions turn to callbacks, callbacks to a debut, a debut to a billboard over the highway you used to walk beneath. The shutter clicks like a metronome; stylists, premieres, flashbulbs stitching your name into the skyline. Fans draw you in the margins of their notebooks. Strangers feel they know you, which is flattering and faintly false."; },
+        function (c) { return "There is a binder somewhere labeled only with a date — every “no” you ever heard. Roles you took to pay rent. Friends who loved the poster, not the person. And always the quiet arithmetic of a face that changes on schedule. Some mornings you pass a mirror and negotiate with it."; },
+        function (c) { return "Cameras adored you here. Notice how few of them asked how you were. The library’s whisper: you were interesting long before you were visible — and you will remain so long after the last flash. Carry the person off-set; the image can stay."; }
+      ]
+    },
+
+    {
+      id: "athlete",
+      role: "an athlete the stadium chants for",
+      title: "The Starting-Block Life",
+      tagline: "Forty thousand throats shape your name.",
+      colors: ["#b45309", "#dc2626"],
+      keywords: ["athlete", "sport", "cricket", "cricketer", "football", "footballer", "olympic", "runner", "player", "chess", "badminton", "tennis", "boxer", "swimmer", "gymnast", "archer", "kabaddi", "hockey"],
+      neighbors: ["dancer", "idol", "pilot"],
+      chapters: [
+        function (c) { return "The stadium holds its breath. Forty thousand throats shape your name, and in this life it does not crack. The starting blocks are cold. You have never been more awake."; },
+        function (c) { return "Training at dawn, ice baths, the coach’s whistle like a second heartbeat. Season after season the numbers bend upward until the record board carries your surname. The medal hangs heavy and right. At " + c.age + ", in the ledger you know, you watched finals on a small screen and imagined the roar. Here, you are the reason for it."; },
+        function (c) { return "Then the knee goes in the quarter-final, quietly, like a door closing. Rehab is a religion without miracles. You return slower; younger bodies orbit you; the crowd still claps, but it is saying goodbye in advance. The day you retire, the stadium is full — and you are not sure which of you is the one being celebrated."; },
+        function (c) { return "Your body keeps the score of every life you refused to live inside it. The library whispers: strength is not the absence of fracture — it is what you build around it. Rest is training too."; }
+      ]
+    },
+
+    {
+      id: "writer",
+      role: "a writer whose sentences strangers underline",
+      title: "The Manuscript Life",
+      tagline: "The rejection letters stopped. One said yes.",
+      colors: ["#92400e", "#d97706"],
+      keywords: ["writer", "author", "poet", "poetry", "novel", "novelist", "book", "books", "story", "stories", "blogger", "journalist", "screenwriter"],
+      neighbors: ["teacher", "creator", "artist"],
+      chapters: [
+        function (c) { return "A desk, a window, a manuscript thick as a brick. The rejection letters stop; the acceptance letter has a stamp on it. In this life, " + c.name + ", the world agreed to read what you had to say."; },
+        function (c) { return "Publication at twenty-six. Launch events with wine you cannot afford; letters from strangers saying your sentences kept them company on night trains. You learn the monk’s discipline of the empty page and the strange immortality of seeing your name on a spine. Reviews are mixed, sales are decent, and one reader writes that she rereads you “like weather.” At " + c.age + ", in the ordinary ledger, your notebooks stayed private. Here, they paid the rent."; },
+        function (c) { return "But the second book terrifies you — every sentence auditions for its predecessor. Deadlines eat whole seasons. Sometimes you write what sells and find your real question buried at the bottom of a drawer. Success, you discover, has its own blank page."; },
+        function (c) { return "You have already survived a thousand endings on paper. The one life that genuinely needs your unfinished drafts is your own. The library whispers: keep a notebook — for nobody. That is where the truth lives."; }
+      ]
+    },
+
+    {
+      id: "entrepreneur",
+      role: "the founder whose napkin sketch became a skyline",
+      title: "The Corner-Office Life",
+      tagline: "A garage, one chair, infinite ambition.",
+      colors: ["#0f766e", "#ca8a04"],
+      keywords: ["business", "entrepreneur", "startup", "ceo", "founder", "millionaire", "billionaire", "richest", "rich", "money", "tycoon", "brand", "company", "owner"],
+      neighbors: ["chef", "artist", "engineer"],
+      chapters: [
+        function (c) { return "The garage has one chair, a secondhand server, and ambition enough for a skyline. In this life, the pitch lands, the money flows, and the logo you sketched on a napkin learns to fly."; },
+        function (c) { return "Growth like weather: offices, offshore teams, magazine covers, a number with commas. The magazine calls you “visionary,” which means nobody can explain what you do. You buy the car, then the building; you give your parents the house with the garden. People say you made it, and for a while you agree."; },
+        function (c) { return "But birthdays happen on conference calls. Friends become employees, then memories. The penthouse at midnight is very quiet, and wealth, you discover, is excellent at keeping score and useless at keeping company. You begin to wonder which version of yourself got left behind in the garage."; },
+        function (c) { return "Wealth is a key, not a room. The library asks only that you remember which doors you would rather unlock — and that some of them never required money. A napkin dream is still a dream; do not move out of it entirely."; }
+      ]
+    },
+
+    {
+      id: "chef",
+      role: "a chef whose kitchen feeds a whole city’s heart",
+      title: "The Brigade Life",
+      tagline: "Ninety degrees, and perfectly calm.",
+      colors: ["#c2410c", "#eab308"],
+      keywords: ["chef", "cook", "cooking", "baker", "bakery", "food", "restaurant", "culinary", "barista", "hotel management"],
+      neighbors: ["artist", "entrepreneur", "marine"],
+      chapters: [
+        function (c) { return "The kitchen is ninety degrees and perfectly calm. In this life, " + c.name + ", your hands feed people — and someone, eventually, wrote a star next to your name."; },
+        function (c) { return "Stations first: garde manger, poissonnier, the brigade shouting in a language you learned like love. Then your own kitchen, your own menu, the critic’s quiet nod, the star. The signature dish — the one with your grandmother’s spice ratio — becomes the reservation people make for anniversaries, proposals, forgiven grudges."; },
+        function (c) { return "But burns map your forearms; holidays vanish into dinner service; the staff meal is the only family dinner left. One night you plate forty covers and realize you have not sat at a table in weeks — eating slowly, in the company of someone you love."; },
+        function (c) { return "Feeding people is holy work; the library insists you are allowed to be fed as well. Set a place for yourself at your own table. Some recipes only work shared."; }
+      ]
+    },
+
+    {
+      id: "artist",
+      role: "an artist whose work outlives the market",
+      title: "The North-Light Life",
+      tagline: "The gallery called first.",
+      colors: ["#a21caf", "#ec4899"],
+      keywords: ["artist", "art", "painter", "painting", "designer", "design", "fashion", "illustrator", "sculptor", "architecture", "architect", "photographer", "photography", "makeup", "interior"],
+      neighbors: ["actor", "writer", "creator"],
+      chapters: [
+        function (c) { return "The studio has north light and the smell of turpentine. In this life, the gallery called first. Your canvases hang in rooms where people instinctively lower their voices."; },
+        function (c) { return "Years of sketchbooks finally resolve into a voice — yours, unmistakable. The dress you draped on a Friday is photographed on a Saturday, and by Sunday it exists in a hundred languages. Commissions arrive; your style is imitated, argued about, credited. At " + c.age + ", in the ledger you know, you were told art is a hobby. Here it is your address."; },
+        function (c) { return "Yet commercial work crowds out the canvas nobody buys. Deadlines flatten your questions into deliverables. Some months you catch yourself making for the market what you once made for the mirror. A mural gets painted over for a billboard. The billboard is for a bank."; },
+        function (c) { return "Everything beautiful you made still exists somewhere, permanently. So do you — and both need daylight. The library’s whisper: protect one uncommissioned hour a week. That is the studio the market cannot gentrify."; }
+      ]
+    },
+
+    {
+      id: "astronaut",
+      role: "an astronaut holding the whole world in attention",
+      title: "The Blue-Marble Life",
+      tagline: "Thirty kilograms of suit, and it feels like a hug.",
+      colors: ["#1e3a8a", "#0ea5e9"],
+      keywords: ["astronaut", "space", "mars", "moon", "cosmos", "galaxy", "star", "stars", "orbit", "rocket", "spacex", "alien"],
+      neighbors: ["scientist", "pilot", "engineer"],
+      chapters: [
+        function (c) { return "The suit weighs thirty kilograms and feels, strangely, like a hug. Through the small window, the Earth is doing that impossible thing it does — glowing, defenseless, whole. In this life, " + c.name + ", humanity lent you its eyes."; },
+        function (c) { return "Training: centrifuge spins, underwater rigs, exams in three languages. Then the ride up — eight minutes of controlled thunder — and suddenly your coffee floats. From orbit, borders vanish; wars look like weather. The first spacewalk lasts six hours and quietly reorders your atoms. Back home, children write to ask what it is like to hold the Moon in your attention."; },
+        function (c) { return "But the years are simulations and goodbyes. Family milestones arrive through a delay-lagged screen. Gravity returns heavier than before — literally, and otherwise. Some nights you dream of the blue marble and wake guilty for having left it at all."; },
+        function (c) { return "From far enough away, every border disappears; from close enough, so does every grudge. The library asks you to carry one of those distances home. Perspective, luckily, is a reusable rocket."; }
+      ]
+    },
+
+    {
+      id: "dancer",
+      role: "a dancer whose body speaks in fluent music",
+      title: "The Barre Life",
+      tagline: "The program prints your name beside the lead.",
+      colors: ["#9d174d", "#c084fc"],
+      keywords: ["dance", "dancer", "ballet", "choreographer", "choreography"],
+      neighbors: ["athlete", "idol", "actor"],
+      chapters: [
+        function (c) { return "The barre is worn smooth by generations of hands. In this life, your body is fluent — and the program with your name beside the lead role is printed in four languages."; },
+        function (c) { return "Years of six-in-the-morning stretches, of counting music like prayer, resolve into the principal role. Curtain calls stack like offerings; your turnout gets mentioned in reviews; a girl in the corps watches you the way you once watched someone. At " + c.age + ", in the ledger you know, dance was the thing behind the door you closed. Here, the door never shut."; },
+        function (c) { return "But ankles negotiate their own contracts. Mirrors grow candid with age; the body retires its chairs earlier than the heart. The farewell performance sells out, and halfway through you understand they are applauding your past tense."; },
+        function (c) { return "Dance has no alphabet and no retirement. The library whispers: move where you are — kitchen, hallway, monsoon. The music does not check your credentials."; }
+      ]
+    },
+
+    {
+      id: "teacher",
+      role: "a teacher remembered decades later",
+      title: "The Chalk-Dust Life",
+      tagline: "They remember you in rooms you’ll never enter.",
+      colors: ["#166534", "#84cc16"],
+      keywords: ["teacher", "teach", "teaching", "professor", "school", "coach", "mentor", "tuition"],
+      neighbors: ["writer", "doctor", "scientist"],
+      chapters: [
+        function (c) { return "Chalk dust in the afternoon light, thirty-two chairs, one bell. In this life, " + c.name + ", they remember you — decades later, in rooms you will never enter."; },
+        function (c) { return "Not fame, but frequency: the lesson that catches a student at the exact angle of her doubt; the boy who returns at twenty-five to say you were the first person who believed he could. You teach long enough to teach the children of your students. Your name ends up in speeches you were never invited to hear."; },
+        function (c) { return "Yet the salary is modest and the paperwork mountainous. The poems you meant to write become lesson plans. Some years the system makes you feel like a clerk of other people’s potential, and one evening you wonder aloud whether anyone will ever remember yours."; },
+        function (c) { return "Most legacies are quiet, and the loudest ones never know them. The library whispers: you planted in soil you will not see harvested. That is not a loss — that is exactly how orchards work."; }
+      ]
+    },
+
+    {
+      id: "creator",
+      role: "a creator the internet invites into its pockets",
+      title: "The Ring-Light Life",
+      tagline: "Upload complete. A million people are watching.",
+      colors: ["#dc2626", "#7c3aed"],
+      keywords: ["youtuber", "youtube", "streamer", "twitch", "gamer", "gaming", "esports", "influencer", "vlogger", "podcast", "content", "tiktok", "reels", "video", "anchor", "rj ", "radio"],
+      neighbors: ["idol", "actor", "writer"],
+      chapters: [
+        function (c) { return "Ring light on, thumbnail ready, the upload bar filling like a thermometer. In this life, the internet knows your face before your neighborhood does."; },
+        function (c) { return "The first video breaks; the channel compounds. A million subscribers, brand deals, fan art, convention panels where people queue for your hand. You turn the hobby that lived in your bedroom into a livelihood, then something like an empire — employees, a studio, a flag on the lawn. At " + c.age + ", in the ledger you know, you were told to log off and study. Here, the screen studied you back."; },
+        function (c) { return "But the algorithm is a landlord who can evict overnight. The comments section glows like a city at three in the morning; privacy becomes a premium subscription. Friends get measured in collaborations. One day you realize you have performed your life for so long that the unrecorded moments feel somehow less real."; },
+        function (c) { return "Attention is rented, never owned. The library asks you to build something no one can unsubscribe from: your own regard. Log off and touch grass — the world uploads nothing, yet keeps everything."; }
+      ]
+    },
+
+    {
+      id: "marine",
+      role: "a marine biologist with salt on your sleeves",
+      title: "The Tidal Life",
+      tagline: "Your patients have scales, shells, or silence.",
+      colors: ["#155e75", "#2dd4bf"],
+      keywords: ["marine biologist", "marine", "ocean", "animal", "animals", "veterinary", "vet ", "wildlife", "zoo", "zookeeper", "dolphin", "whale", "turtle", "shark", "dog", "cats", "pet", "bird"],
+      neighbors: ["scientist", "chef", "astronaut"],
+      chapters: [
+        function (c) { return "Salt on your sleeves, diesel in the wind, the research vessel doing its slow drumbeat against the swell. In this life, " + c.name + ", your patients have scales, shells, or silence."; },
+        function (c) { return "Tagging the turtle who outswims empires; the rescue calf that nurses at your hand; the reef census that proves, against all lobbying, that the ocean is warming. Grants are scarce; the work is wet; the data outlives the funding. Every spring you migrate like the animals you study, and the calendar is written in currents."; },
+        function (c) { return "Storms cancel whole seasons; politics cancels studies; some species you counted in your twenties exist now only in your spreadsheets. There are nights on deck when the size of the problem and the smallness of your boat negotiate a rough, tender peace."; },
+        function (c) { return "The ocean does not hurry, and neither does healing. The library whispers: depth over speed. You are allowed to be a creature who takes her time."; }
+      ]
+    },
+
+    {
+      id: "pilot",
+      role: "a pilot for whom sunrise happens above the clouds",
+      title: "The Cockpit Life",
+      tagline: "Runway lights, like a sentence you get to finish.",
+      colors: ["#334155", "#38bdf8"],
+      keywords: ["pilot", "aviation", "fly", "flying", "airline", "air hostess", "airport", "captain"],
+      neighbors: ["astronaut", "entrepreneur", "engineer"],
+      chapters: [
+        function (c) { return "The cockpit glows amber in the pre-dawn dark. Runway lights unspool ahead like a sentence you get to finish. In this life, " + c.name + ", the sky is your workplace — and you are very good at it."; },
+        function (c) { return "First solo while the world was still in bed. Thousands of landings across monsoons and clear winter dawns; sunrises above the cloud layer that photographs have never once captured honestly. The uniform carries a quiet respect; strangers go still at parties when you mention what you fly."; },
+        function (c) { return "But hotels blur into one another; birthdays happen over the intercom; the bed at home is a frequent-guest room you visit between sectors. Some arrivals, the city below is so beautiful it aches — and you will be asleep there in four hours."; },
+        function (c) { return "Every landing is a small decision to come back. The library asks: keep deciding — and put down roots deep enough to land in. A life aloft needs gravity too."; }
+      ]
+    }
+  ];
+
+  /* The shelf always holds one special volume:
+     the life in which everything simply… went right. */
+  var UNBROKEN = {
+    id: "unbroken",
+    role: "the version of you that everything went right for",
+    title: "The Life That Never Doubted",
+    tagline: "One book has no author photograph.",
+    colors: ["#713f12", "#fbbf24"],
+    keywords: [],
+    neighbors: [],
+    chapters: [
+      function (c) { return "One book on this shelf has no author photograph. It is the life in which the letter said yes at eighteen, the door opened early, and doubt — that small grey roommate — never moved in. The librarian slides it toward you without a word."; },
+      function (c) { return "Read it luxuriously. The exam went your way the first time. The love stayed. The career climbed like a staircase with good lighting. Applause, comfort, the respect of everyone whose opinion you were raised to fear. For a while it gleams like a harbor."; },
+      function (c) { return "Then, around the fifth chapter, a quiet strangeness: a museum feeling. Success without resistance has no grip; comfort without contrast is a room with no echoes. You realize, with a chill, that you have begun to miss the old grey roommate — doubt, whose nagging used to push you toward everything real. Perfection, it turns out, grows bored of itself."; },
+      function (c) { return "Even perfection grows tired of being perfect. A life without resistance is a violin string with nothing to pluck. You do not need a flawless life; you need your life — the one with the beautiful fractures. Close this book gently. The librarian is already holding the door to what comes next."; }
+    ]
+  };
+
+  /* When the library cannot name your wish, it writes it verbatim
+     into the journal anyway — every wanting deserves a door. */
+  var GENERIC = {
+    id: "generic",
+    role: "the life you described, in your own words",
+    title: "The Life You Named",
+    tagline: "Whatever you asked for, this is its door.",
+    colors: ["#3730a3", "#7c3aed"],
+    keywords: [],
+    neighbors: [],
+    chapters: [
+      function (c) { return "You told the library, plainly, what you wanted: “" + c.wish + ".” The librarian wrote it down in a hand older than ink, then led you to a door you had somehow walked past every single day of your life."; },
+      function (c) { return "On the other side, it is all true. The mornings belong to it; the skills are settled in your hands; the people who matter recognize you for it. " + c.name + ", at " + c.age + ", you carried the wanting so long it became furniture. Here, the wanting is the architecture. Notice how natural competence feels after a decade of practice — like breathing with the windows open."; },
+      function (c) { return "And yet — every life has its own small weather. There are evenings when the dream asks more of you than you planned to give, when you miss the strange mercy of wanting something you cannot have. Even answered prayers grow mouths."; },
+      function (c) { return "The library never promised a flawless life; it only lends lives, like books. This one is yours for a while — read it gently, take what is useful, dog-ear nothing. The shelf is patient, and so are you."; }
+    ]
+  };
+
+  /* ------------------------- matching ------------------------- */
+
+  function scoreKeywords(keywords, text) {
+    var t = (" " + text.toLowerCase() + " ");
+    var score = 0;
+    for (var i = 0; i < keywords.length; i++) {
+      var k = keywords[i].toLowerCase();
+      if (t.indexOf(k) !== -1) {
+        score += k.length >= 5 ? 2 : 1;
+      }
+    }
+    return score;
+  }
+
+  function byId(id) {
+    for (var i = 0; i < ARCHETYPES.length; i++) {
+      if (ARCHETYPES[i].id === id) return ARCHETYPES[i];
+    }
+    return null;
+  }
+
+  function pickSecondary(primary, wish) {
+    // Best neighbour by wish relevance; else the top-scoring stranger.
+    if (primary && primary.neighbors && primary.neighbors.length) {
+      var best = null, bestScore = 0;
+      for (var i = 0; i < primary.neighbors.length; i++) {
+        var cand = byId(primary.neighbors[i]);
+        if (!cand || cand.id === primary.id) continue;
+        var s = scoreKeywords(cand.keywords, wish);
+        if (s > bestScore) { bestScore = s; best = cand; }
+      }
+      if (best) return best;
+      return byId(primary.neighbors[0]);
+    }
+    // Generic primary: choose by the letters of the wish, deterministically.
+    var idx = (wish.length * 7 + 3) % ARCHETYPES.length;
+    return ARCHETYPES[idx];
+  }
+
+  function build(name, age, wish) {
+    var ctx = { name: name, age: age, wish: wish };
+
+    var scored = ARCHETYPES.map(function (a) {
+      return { a: a, s: scoreKeywords(a.keywords, wish) };
+    }).sort(function (x, y) { return y.s - x.s; });
+
+    var primary = scored[0].s > 0 ? scored[0].a : GENERIC;
+    var secondary = pickSecondary(primary, wish);
+
+    // Never show the same shelf twice.
+    if (secondary.id === primary.id) {
+      secondary = ARCHETYPES[(scored[0].s + 5) % ARCHETYPES.length];
+    }
+
+    var picks = [primary, secondary, UNBROKEN];
+
+    return picks.map(function (life, i) {
+      return {
+        id: life.id,
+        volume: ROMAN_VOLUMES[i],
+        role: life.role,
+        title: life.title,
+        tagline: life.tagline,
+        colors: life.colors,
+        chapters: life.chapters.map(function (fn) { return fn(ctx); })
+      };
+    });
+  }
+
+  /* ------------------------- epilogue ------------------------- */
+
+  function epilogue(name, age) {
+    return [
+      name + ". You were " + age + " years old when you stepped into the midnight of your own becoming. Three lives you borrowed, and each of them handed you something: the spotlight’s truth, another road’s weather, and a perfect life’s small emptiness.",
+      "The books are closing now. The stars are going back to being stars. Somewhere behind you, all those doors are shutting softly — not in refusal, but in recognition.",
+      "The library was never trying to sell you another life. It was trying to hand you back your own. However ordinary it seems, however interrupted — this is the one life in which your presence is irreplaceable. The most perfect role you will ever play, in any library in any universe, is you.",
+      "Take it."
+    ];
+  }
+
+  return {
+    build: build,
+    chapterHeadings: CHAPTER_HEADINGS,
+    epilogue: epilogue
+  };
+})();
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = LivesEngine;
+}
+
+</script>
+<script>
+/* The Midnight Library — front desk
+   Screen flow: landing window -> details -> shelf of lives ->
+   reading a volume -> the epilogue under your name in stars. */
+(function () {
+  "use strict";
+
+  var $ = function (sel) { return document.querySelector(sel); };
+
+  var state = {
+    name: "",
+    age: 25,
+    wish: "",
+    lives: [],
+    lastRead: null,   // index into lives
+    page: 0,
+    headings: LivesEngine.chapterHeadings
+  };
+
+  var STORE_KEY = "midnight-library-visit";
+
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (m) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m];
+    });
+  }
+
+  function roman(n) {
+    var table = [[10, "X"], [9, "IX"], [5, "V"], [4, "IV"], [1, "I"]];
+    var out = "";
+    for (var i = 0; i < table.length; i++) {
+      while (n >= table[i][0]) { out += table[i][1]; n -= table[i][0]; }
+    }
+    return out;
+  }
+
+  function clampAge(v) {
+    var n = parseInt(v, 10);
+    if (isNaN(n)) n = 25;
+    return Math.max(8, Math.min(120, n));
+  }
+
+  /* ------------------------- screens ------------------------- */
+
+  function show(id) {
+    var screens = document.querySelectorAll(".screen");
+    for (var i = 0; i < screens.length; i++) screens[i].classList.remove("active");
+    var el = document.getElementById(id);
+    void el.offsetWidth; // restart the fade transition
+    el.classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------------------- welcome back ----------------------- */
+
+  function restore() {
+    try {
+      var saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+      if (!saved) return;
+      if (saved.name) $("#f-name").value = saved.name;
+      if (saved.age) $("#f-age").value = saved.age;
+      if (saved.wish) $("#f-wish").value = saved.wish;
+      var wb = $("#welcome-back");
+      wb.textContent = "Welcome back, " + saved.name + " — the library kept your seat.";
+      wb.hidden = false;
+    } catch (e) { /* private mode etc. — the library forgives */ }
+  }
+
+  /* ------------------------ landing -------------------------- */
+
+  function initWindow() {
+    var win = $("#window-door");
+    win.addEventListener("click", function () {
+      if (win.classList.contains("open")) return;
+      win.classList.add("open");
+      win.setAttribute("aria-expanded", "true");
+      setTimeout(function () { show("screen-form"); }, 1250);
+    });
+  }
+
+  /* -------------------------- form --------------------------- */
+
+  function initForm() {
+    $("#library-form").addEventListener("submit", function (e) {
+      e.preventDefault();
+      var name = $("#f-name").value.trim() || "Wanderer";
+      var age = clampAge($("#f-age").value);
+      var wish = $("#f-wish").value.trim();
+
+      state.name = name;
+      state.age = age;
+      state.wish = wish;
+      state.lives = LivesEngine.build(name, age, wish);
+
+      try {
+        localStorage.setItem(STORE_KEY, JSON.stringify({ name: name, age: age, wish: wish }));
+      } catch (err) { /* fine */ }
+
+      renderShelf();
+      show("screen-library");
+    });
+
+    $("#btn-edit").addEventListener("click", function () {
+      show("screen-form");
+    });
+  }
+
+  /* -------------------------- shelf -------------------------- */
+
+  function renderShelf() {
+    $("#library-title").textContent = "Welcome, " + state.name + ".";
+    $("#library-lede").textContent =
+      "Three volumes have been pulled for you, from the shelf nearest your wishing heart.";
+
+    var shelf = $("#shelf");
+    shelf.innerHTML = "";
+
+    state.lives.forEach(function (life, i) {
+      var book = document.createElement("button");
+      book.className = "book";
+      book.style.setProperty("--c1", life.colors[0]);
+      book.style.setProperty("--c2", life.colors[1]);
+      book.setAttribute("aria-label", "Read " + life.title + ": " + life.role);
+      book.innerHTML =
+        '<span class="vol">Volume ' + life.volume + "</span>" +
+        '<span class="btitle">' + esc(life.title) + "</span>" +
+        '<span class="brole">' + esc(life.tagline) + "</span>";
+      book.addEventListener("click", function () { openReader(i); });
+      shelf.appendChild(book);
+    });
+  }
+
+  /* ------------------------- reader -------------------------- */
+
+  function totalPages(life) { return life.chapters.length + 1; } // cover + chapters
+
+  function openReader(i) {
+    state.lastRead = i;
+    state.page = 0;
+    renderPage();
+    $("#reader").hidden = false;
+    document.body.style.overflow = "hidden";
+    $("#pg-next").focus();
+  }
+
+  function closeReader() {
+    $("#reader").hidden = true;
+    document.body.style.overflow = "";
+  }
+
+  function renderPage() {
+    var life = state.lives[state.lastRead];
+    var total = totalPages(life);
+    var pageEl = $("#page");
+
+    $("#reader-crumb").textContent =
+      "Volume " + life.volume + " · " + life.title;
+
+    var html = "";
+    if (state.page === 0) {
+      html =
+        '<p class="p-vol">The Midnight Library Press</p>' +
+        "<h3>" + esc(life.title) + "</h3>" +
+        '<p class="p-role">' + esc(life.role) + "</p>" +
+        '<div class="cover-ornament">&#10022; &#10022; &#10022;</div>' +
+        '<hr class="rule">' +
+        '<p class="belongs">This copy belongs to<br><strong>' + esc(state.name) +
+        ", age " + state.age + "</strong><br>borrowed tonight, beneath these exact stars.</p>" +
+        '<button class="dl-link" id="dl-life">&#8681; Keep this volume as a text file</button>';
+    } else {
+      html =
+        '<p class="chapter-label">' + esc(state.headings[state.page - 1]) + "</p>" +
+        '<div class="p-body"><p>' + esc(life.chapters[state.page - 1]) + "</p></div>";
+    }
+
+    pageEl.innerHTML = html;
+    pageEl.classList.remove("swap");
+    void pageEl.offsetWidth;
+    pageEl.classList.add("swap");
+    pageEl.scrollTop = 0;
+
+    $("#pg-count").textContent =
+      "Page " + roman(state.page + 1) + " of " + roman(total);
+    $("#pg-prev").disabled = state.page === 0;
+    $("#pg-prev").style.visibility = state.page === 0 ? "hidden" : "visible";
+    $("#pg-next").textContent = state.page === total - 1 ? "Close the book" : "Next &rarr;";
+
+    var dl = $("#dl-life");
+    if (dl) dl.addEventListener("click", function () { downloadLife(state.lastRead); });
+  }
+
+  function step(d) {
+    var life = state.lives[state.lastRead];
+    var total = totalPages(life);
+    var next = state.page + d;
+    if (next < 0) return;
+    if (next >= total) { closeReader(); return; }
+    state.page = next;
+    renderPage();
+  }
+
+  function initReader() {
+    $("#pg-prev").addEventListener("click", function () { step(-1); });
+    $("#pg-next").addEventListener("click", function () { step(1); });
+    $("#reader-close").addEventListener("click", closeReader);
+
+    document.addEventListener("keydown", function (e) {
+      if ($("#reader").hidden) return;
+      if (e.key === "ArrowRight") step(1);
+      else if (e.key === "ArrowLeft") step(-1);
+      else if (e.key === "Escape") closeReader();
+    });
+
+    $("#btn-own-life").addEventListener("click", function () {
+      renderEpilogue();
+      show("screen-epilogue");
+    });
+  }
+
+  /* ------------------------ epilogue ------------------------- */
+
+  function renderEpilogue() {
+    var parts = LivesEngine.epilogue(state.name, state.age);
+    var box = $("#epi-text");
+    box.innerHTML = "";
+    parts.forEach(function (p, i) {
+      var el = document.createElement("p");
+      if (i === parts.length - 1) el.style.textAlign = "center";
+      el.textContent = p;
+      box.appendChild(el);
+    });
+    requestAnimationFrame(function () { drawConstellation(); });
+  }
+
+  function drawConstellation() {
+    var cv = $("#constellation");
+    if (!cv || !cv.getContext) return;
+    var ctx = cv.getContext("2d");
+    if (!ctx) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = cv.clientWidth, h = cv.clientHeight;
+    if (!w || !h) return;
+    cv.width = Math.floor(w * dpr);
+    cv.height = Math.floor(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+
+    var text = (state.name || "You").toUpperCase();
+    var fontSize = Math.min(46, Math.max(24, w / (text.length * 0.72)));
+    ctx.font = 'italic ' + fontSize + 'px "Times New Roman", Times, serif';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "alphabetic";
+
+    var gap = Math.max(12, fontSize * 0.28);
+    var widths = [];
+    for (var i = 0; i < text.length; i++) widths.push(ctx.measureText(text[i]).width);
+    var total = widths.reduce(function (a, b) { return a + b; }, 0) + gap * (text.length - 1);
+    var x = (w - total) / 2;
+    var baseY = h * 0.66;
+
+    var pts = [];
+    for (var j = 0; j < text.length; j++) {
+      var cw = widths[j];
+      var cx = x + cw / 2;
+      var cy = baseY - (j % 2 === 0 ? 16 : 6) + Math.sin(j * 1.3) * 5;
+      pts.push([cx, cy + 14]);               // node sits under the letter
+      ctx.fillStyle = "rgba(238,242,255,0.96)";
+      ctx.fillText(text[j], cx, cy);
+      x += cw + gap;
+    }
+
+    // gold thread between the letters
+    ctx.strokeStyle = "rgba(230,197,132,0.8)";
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    pts.forEach(function (p, k) { if (k === 0) ctx.moveTo(p[0], p[1]); else ctx.lineTo(p[0], p[1]); });
+    ctx.stroke();
+
+    // star-nodes
+    pts.forEach(function (p) {
+      ctx.fillStyle = "#e6c584";
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "rgba(230,197,132,0.25)";
+      ctx.beginPath();
+      ctx.arc(p[0], p[1], 6, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  /* ------------------------ downloads ------------------------ */
+
+  function journalText(lifeOrNull) {
+    var lines = [];
+    lines.push("THE MIDNIGHT LIBRARY — an aspirational journal");
+    lines.push("borrowed by " + state.name + ", age " + state.age);
+    lines.push("wishing: \"" + state.wish + "\"");
+    lines.push("");
+
+    var lives = lifeOrNull === null ? state.lives : [state.lives[lifeOrNull]];
+    lives.forEach(function (life) {
+      lines.push("--------------------------------------------------");
+      lines.push("VOLUME " + life.volume + " · " + life.title.toUpperCase());
+      lines.push(life.role);
+      lines.push("");
+      life.chapters.forEach(function (ch, i) {
+        lines.push(state.headings[i]);
+        lines.push(ch);
+        lines.push("");
+      });
+    });
+
+    lines.push("==================================================");
+    lines.push("EPILOGUE — THE MOST PERFECT ROLE");
+    lines.push("");
+    LivesEngine.epilogue(state.name, state.age).forEach(function (p) {
+      lines.push(p);
+      lines.push("");
+    });
+    return lines.join("\n");
+  }
+
+  function downloadText(filename, text) {
+    var blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 150);
+  }
+
+  function safeName() {
+    return (state.name || "wanderer").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "wanderer";
+  }
+
+  function downloadLife(i) {
+    downloadText("midnight-library-volume-" + state.lives[i].volume + ".txt", journalText(i));
+  }
+
+  function initActions() {
+    $("#btn-download").addEventListener("click", function () {
+      downloadText("the-midnight-library-journal.txt", journalText(null));
+    });
+
+    $("#btn-again").addEventListener("click", function () {
+      show("screen-landing");
+    });
+
+    var resizeTimer;
+    window.addEventListener("resize", function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(drawConstellation, 120);
+    });
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(drawConstellation);
+    }
+  }
+
+  /* -------------------------- boot --------------------------- */
+
+  restore();
+  initWindow();
+  initForm();
+  initReader();
+  initActions();
+})();
+
+</script>
+</body>
+</html>

@@ -126,7 +126,7 @@ body {
 
 .scene {
   position: relative;
-  width: min(64vmin, 470px);
+  width: min(58vmin, 420px);
   margin: 0 auto clamp(0.8rem, 2vh, 1.5rem);
   display: flex; flex-direction: column; align-items: center;
 }
@@ -145,6 +145,8 @@ body {
 }
 
 .window3d {
+  display: block;
+  width: 100%;
   position: relative; z-index: 1;
   background: none; border: none; padding: 0; cursor: pointer;
   perspective: 1250px;
@@ -155,6 +157,7 @@ body {
 
 .window-tilt {
   display: block;
+  width: 100%;
   transform-style: preserve-3d;
   transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
   transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);

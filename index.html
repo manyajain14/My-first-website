@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Midnight Library — An Aspirational Journal</title>
+<meta name="description" content="A fan-made interactive journal inspired by Matt Haig's The Midnight Library. Open the window, borrow a life, and return to your own.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- ================= LANDING ================= -->
+<main id="screen-landing" class="screen active" aria-label="Welcome">
+  <p class="overline">Between life and death there is a library</p>
+  <h1 class="site-title">The Midnight<br>Library</h1>
+  <p class="site-sub">An aspirational journal for the lives we almost lived.</p>
+
+  <button id="window-door" class="window" aria-label="Open the window into the library" aria-expanded="false">
+    <span class="window-frame">
+      <span class="window-inner">
+        <span class="glow"></span>
+        <span class="glass"></span>
+        <span class="pane pane-left"></span>
+        <span class="pane pane-right"></span>
+        <span class="mullion mullion-v"></span>
+        <span class="mullion mullion-h"></span>
+      </span>
+    </span>
+    <span class="hint">Click the window to open it</span>
+  </button>
+
+  <p id="welcome-back" class="welcome-back" hidden></p>
+
+  <footer class="landing-foot">
+    <p class="teaser">Some lives must be borrowed before the one you have is seen.</p>
+    <p class="credit">A fan-made tribute, inspired by Matt Haig&rsquo;s <em>The Midnight Library</em>.</p>
+  </footer>
+</main>
+
+<!-- ================= DETAILS FORM ================= -->
+<section id="screen-form" class="screen" aria-label="Your details">
+  <div class="form-wrap">
+    <p class="overline">Step through</p>
+    <h2 class="screen-title">Tell the library who you are</h2>
+    <p class="lede">Before the doors can open, the librarian asks for three small truths.</p>
+
+    <form id="library-form" class="card" autocomplete="off">
+      <div class="field-grid">
+        <div class="field">
+          <label for="f-name">Your name</label>
+          <input id="f-name" name="name" type="text" maxlength="40" placeholder="Whoever you are tonight" required>
+        </div>
+        <div class="field">
+          <label for="f-age">Your age</label>
+          <input id="f-age" name="age" type="number" min="8" max="120" step="1" placeholder="25" required>
+        </div>
+      </div>
+      <div class="field">
+        <label for="f-wish">Whose life do you wish to borrow?</label>
+        <textarea id="f-wish" name="wish" rows="3" maxlength="240"
+          placeholder="a K-pop idol · a doctor who cleared NEET · a version of me who never gave up"
+          required></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Open the Library</button>
+      <p class="fineprint">Your words never leave this page — the library is polite like that.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ================= SHELF OF LIVES ================= -->
+<section id="screen-library" class="screen" aria-label="The shelf of borrowed lives">
+  <div class="lib-wrap">
+    <p class="overline">The library of lives</p>
+    <h2 class="screen-title" id="library-title">Welcome, traveler.</h2>
+    <p class="lede" id="library-lede">Three volumes have been pulled for you. Borrow one — or return to your own life.</p>
+
+    <div id="shelf" class="shelf"></div>
+
+    <div class="lib-actions">
+      <button id="btn-own-life" class="btn">Return to your own life</button>
+      <button id="btn-edit" class="btn btn-ghost">Change your details</button>
+    </div>
+    <p class="fineprint">The library keeps the light on. Volumes renew themselves forever.</p>
+  </div>
+</section>
+
+<!-- ================= READER ================= -->
+<div id="reader" class="reader" hidden role="dialog" aria-modal="true" aria-label="A borrowed life">
+  <div class="reader-top">
+    <span id="reader-crumb" class="reader-crumb">Volume I</span>
+    <button id="reader-close" class="reader-close" aria-label="Close the book">&#10005;</button>
+  </div>
+  <article id="page" class="page"></article>
+  <div class="pager">
+    <button id="pg-prev" class="btn btn-small btn-ghost">&larr; Back</button>
+    <span id="pg-count" class="pg-count">Page I of V</span>
+    <button id="pg-next" class="btn btn-small">Next &rarr;</button>
+  </div>
+</div>
+
+<!-- ================= EPILOGUE ================= -->
+<section id="screen-epilogue" class="screen" aria-label="Epilogue">
+  <div class="epi-wrap">
+    <p class="overline">Epilogue</p>
+    <h2 class="screen-title">The Most Perfect Role</h2>
+    <canvas id="constellation" aria-hidden="true"></canvas>
+    <div id="epi-text" class="epi-text"></div>
+    <div class="lib-actions">
+      <button id="btn-download" class="btn">&#10022; Save the epilogue</button>
+      <button id="btn-again" class="btn btn-ghost">Begin again</button>
+    </div>
+  </div>
+</section>
+
+<noscript><p class="noscript">The library needs JavaScript to open its doors.</p></noscript>
+
+<script src="js/stars.js"></script>
+<script src="js/lives.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

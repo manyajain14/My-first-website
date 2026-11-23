@@ -48,11 +48,24 @@ body {
 .screen {
   position: fixed; inset: 0; z-index: 2;
   overflow-y: auto; overflow-x: hidden;
+  scroll-behavior: smooth;
   padding: max(1.1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
            max(1.1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   opacity: 0; visibility: hidden; transform: translateY(16px);
   pointer-events: none;
-  transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0.7s;
+  transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0s linear 0.7s;
+}
+
+/* slim starlight scrollbar */
+.screen::-webkit-scrollbar, .p-scroll::-webkit-scrollbar { width: 9px; }
+.screen::-webkit-scrollbar-track, .p-scroll::-webkit-scrollbar-track { background: rgba(6, 10, 28, 0.6); }
+.screen::-webkit-scrollbar-thumb, .p-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(230, 197, 132, 0.5), rgba(120, 140, 220, 0.45));
+  border-radius: 6px;
+  border: 2px solid rgba(6, 10, 28, 0.6);
+}
+.screen::-webkit-scrollbar-thumb:hover, .p-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(230, 197, 132, 0.8), rgba(120, 140, 220, 0.7));
 }
 
 .screen.active {
@@ -98,13 +111,29 @@ body {
 #screen-landing { gap: 0; }
 
 .site-title {
-  font-size: clamp(2.3rem, 6.4vw, 4.1rem);
+  font-size: clamp(2.3rem, 6.8vw, 4.5rem);
   font-weight: normal; letter-spacing: 0.09em; line-height: 1.06;
   background: linear-gradient(180deg, #ffffff 8%, #dfe7ff 48%, #93a9ff 82%, #6f86e8 100%);
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
   filter: drop-shadow(0 2px 22px rgba(140, 165, 255, 0.35));
   margin-bottom: 0.6rem;
+}
+
+/* staggered reveal when the landing arrives */
+.stage-landing > * {
+  animation: riseIn 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.stage-landing > *:nth-child(1) { animation-delay: 0.05s; }
+.stage-landing > *:nth-child(2) { animation-delay: 0.16s; }
+.stage-landing > *:nth-child(3) { animation-delay: 0.27s; }
+.stage-landing > *:nth-child(4) { animation-delay: 0.38s; }
+.stage-landing > *:nth-child(5) { animation-delay: 0.52s; }
+.stage-landing > *:nth-child(6) { animation-delay: 0.64s; }
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: none; }
 }
 
 .site-sub {
@@ -117,7 +146,7 @@ body {
 
 .scene {
   position: relative;
-  width: min(58vmin, 420px);
+  width: min(72vmin, 560px);
   margin: 0 auto clamp(0.8rem, 2vh, 1.5rem);
   display: flex; flex-direction: column; align-items: center;
 }
@@ -362,7 +391,7 @@ body {
   color: #fff8e7;
   transform: translateY(-1px);
 }
-.btn:active { transform: translateY(0); }
+.btn:active { transform: translateY(0) scale(0.97); }
 .btn:focus-visible { outline: 2px dashed var(--gold); outline-offset: 4px; }
 .btn-ghost { border-color: rgba(238, 242, 255, 0.25); color: var(--ink-dim); }
 .btn-ghost:hover { color: var(--ink); border-color: rgba(238,242,255,.5); box-shadow: 0 0 20px rgba(238, 242, 255, 0.15); }
@@ -419,6 +448,12 @@ body {
   margin: 0.4rem 0 1.8rem;
   perspective: 1000px;
 }
+
+.shelf .book { animation: riseIn 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.shelf .book:nth-child(2) { animation-delay: 0.13s; }
+.shelf .book:nth-child(3) { animation-delay: 0.26s; }
+
+.card { animation: riseIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.08s both; }
 
 .book {
   --c1: #3730a3; --c2: #7c3aed;
@@ -594,8 +629,8 @@ body {
 /* ---------------- responsive ---------------- */
 
 @media (max-width: 720px) {
-  .scene { width: min(78vw, 400px); }
-  .site-title { font-size: clamp(2rem, 9vw, 3rem); }
+  .scene { width: min(82vw, 460px); }
+  .site-title { font-size: clamp(2rem, 9vw, 3.2rem); }
   .book { width: 172px; height: 236px; }
   .book .btitle { top: 42px; bottom: 40px; font-size: 0.94rem; }
   .book .brole { font-size: 0.7rem; }
@@ -614,10 +649,11 @@ body {
 }
 
 @media (max-height: 560px) {
-  .scene { width: min(52vh, 380px); }
-  .site-title { font-size: clamp(1.6rem, 4.5vh, 2.4rem); }
+  .scene { width: min(58vh, 440px); }
+  .site-title { font-size: clamp(1.6rem, 5vh, 2.5rem); }
   .site-sub { margin-bottom: 0.5rem; }
   .landing-foot { margin-top: 0.8rem; }
+  .stage-landing > * { animation-delay: 0s; }
 }
 
 @media (prefers-reduced-motion: reduce) {

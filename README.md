@@ -34,7 +34,8 @@ python3 -m http.server 8000
 | --- | --- |
 | `index.html` | Landing window, details form, shelf, reader, epilogue |
 | `css/style.css` | Navy/gold theme, Times New Roman, glass window animation, bookshelf |
-| `js/stars.js` | Twinkling starfield canvas with occasional shooting stars |
+| `js/stars.js` | Layered twinkling starfield canvas: far/near stars, nebula wash, shooting stars |
+| `js/audio.js` | Synthesized sound effects (Web Audio API): window whoosh + bells, page turns, ambient pad, mute toggle |
 | `js/lives.js` | The "life engine": keyword-matched story archetypes + a generator that writes each borrowed life around your name and age |
 | `js/app.js` | Screen flow, page-turning reader, constellation epilogue, text-file downloads |
 
